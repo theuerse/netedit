@@ -1,0 +1,67 @@
+html, body {
+	position: relative;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+}
+
+#graphContainer {
+	position: relative;
+    height: 100%;
+    left: 0;
+    top: 0;
+    z-index: 10;
+    margin-left: 150px;
+}
+
+#legendContainer {
+	float: left;
+	height: 100%;
+	overflow-y: scroll;
+	width: 150px;
+	background-color: #dcdcdc;
+	box-shadow: 5px 5px 3px #888888;
+}
+
+.noPadding {
+	padding: 0px;
+}
+
+#legendList li {
+	margin-top: 5px;
+}
+
+.popover-title {
+	background: #ccc url("res/jquery-ui/images/ui-bg_highlight-soft_75_cccccc_1x100.png") repeat-x scroll 50% 50%;
+	font-weight: bold;
+ }
+.popover-title > span {
+	margin-left: 5px;
+	margin-right: 5px;
+}
+
+ .popover-content {
+	height: 100%;
+	overflow-y: scroll;
+}
+
+.leftspaced {
+	margin-left: 35px;
+}
+
+html body div#graphContainer div.vis-network div.vis-network-tooltip {
+	width: 15em;
+	background: none;
+	border: none;
+	box-shadow: none;
+}
+
+html body div#graphContainer div.vis-network div.vis-network-tooltip div.popover {
+	display: inline;
+}
+
+meter {
+	vertical-align: middle;
+	margin-right: 5px;
+	width: 60%;
+}
