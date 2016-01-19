@@ -1,10 +1,12 @@
- var mousePosition = {x: 0, y: 0};
+var mousePosition = {x: 0, y: 0};
 
- var images = {
+var images = {
 		router: "res/img/blueRouter.svg",
 		server: "res/img/server.svg",
 		client: "res/img/client.svg"
 	 };
+
+var lengendWidth;
 
 var nodes;
 var edges;
@@ -23,6 +25,8 @@ var network;
  $(document).ready(function(){
 	    // hide javaScriptAlert - div, proof that js works
 	    $(javaScriptAlert).hide();
+
+      lengendWidth = $('#legendContainer').width();
 
       $("body").mousemove(function(e) {
         mousePosition.x = e.pageX;
@@ -89,7 +93,6 @@ function drawLegend(){
         '<center><img class="addable" id="imgClient" src="' + images.client +'" height="64" width="64">Router + Client</center>'+
       '</li>');
 
-      //$('#imgRouter').draggable();
       $(".addable").draggable({
             revert: "invalid" ,
             helper: function(){
@@ -100,20 +103,18 @@ function drawLegend(){
         });
 
 
+        // handle incoming drops from the legend / toolbox
         $( "#graphContainer" ).droppable({
-            drop: function( event, ui ) {
+            drop: function( event, ui ) { console.log(lengendWidth);
+              var pos = network.DOMtoCanvas({x: mousePosition.x - lengendWidth, y: mousePosition.y});
               if(ui.draggable[0].id === "imgRouter"){
-                console.log("adding router " + nodes.length + 1 + " at ("  + ui.position.left+','+ui.position.top+')');
-                nodes.add({id: nodes.length + 1, x: ui.position.left, y: ui.position.top, label: '',shape: "image", image: images.router, shadow: true, physics:false});
-                network.redraw();
+                nodes.add({id: nodes.length + 1, x:pos.x, y: pos.y, label: '',shape: "image", image: images.router, shadow: true, physics:false});
               }else if(ui.draggable[0].id === "imgServer"){
-                console.log("adding server");
+                nodes.add({id: nodes.length + 1, x:pos.x, y: pos.y, label: '',shape: "image", image: images.server, shadow: true, physics:false});
               }else if(ui.draggable[0].id === "imgClient"){
-                console.log("adding client");
+                nodes.add({id: nodes.length + 1, x:pos.x, y: pos.y, label: '',shape: "image", image: images.client, shadow: true, physics:false});
               }
-              //  console.log("dropped!");
-               console.log(event);
-                console.log(ui);
+              network.redraw();
             }
         });
 
