@@ -71,7 +71,22 @@ function initNetwork(){
     },
     nodes: {
       physics: true
-    }
+    },
+		manipulation: {
+			initiallyActive: true,
+			addNode: false,
+			addEdge: function (data, callback) {
+			 if (data.from == data.to) {
+				 var r = confirm("Do you want to connect the node to itself?");
+				 if (r === true) {
+					 callback(data);
+				 }
+			 }
+			 else {
+				 callback(data);
+			 }
+			}
+		}
   };
 
   var container = document.getElementById('graphContainer');
@@ -85,9 +100,7 @@ function initNetwork(){
 
 // Draws a legend containing met-information about the networkLayout (/ Topology)
 function drawLegend(){
-	  $('#legendContainer').append('<ul id="legendList" class="list-group">' +
-										'<li id="legendGraph" class="noPadding list-group-item"></li>' +
-									'</ul>');
+	  $('#legendContainer').append('<ul id="legendList" class="list-group"></ul>');
 
 
       $('#legendList').append('<li class="list-group-item">'+
@@ -128,6 +141,10 @@ function drawLegend(){
 						network.getSelectedNodes().forEach(function(nodeId){
 							nodes.remove({id: nodeId});
 							console.log("deleted Pi #" + nodeId);
+						});
+						network.getSelectedEdges().forEach(function(edgeId){
+							edges.remove({id: edgeId});
+							console.log("deleted edge #" + edgeId);
 						});
 					}
 				});
