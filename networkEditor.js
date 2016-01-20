@@ -78,6 +78,9 @@ function initNetwork(){
   // draw graph
   network = new vis.Network(container, {nodes: nodes,edges: edges}, options);
 
+	// zoom to 100%
+	network.moveTo({scale: 1.0});
+
 }
 
 // Draws a legend containing met-information about the networkLayout (/ Topology)
@@ -105,18 +108,29 @@ function drawLegend(){
 
         // handle incoming drops from the legend / toolbox
         $( "#graphContainer" ).droppable({
-            drop: function( event, ui ) { console.log(lengendWidth);
+            drop: function( event, ui ) {
               var pos = network.DOMtoCanvas({x: mousePosition.x - lengendWidth, y: mousePosition.y});
-              if(ui.draggable[0].id === "imgRouter"){
-                nodes.add({id: nodes.length + 1, x:pos.x, y: pos.y, label: '',shape: "image", image: images.router, shadow: true, physics:false});
+							var nodeId = getNextFreeId();
+              if(ui.draggable[0].id === "imgRouter"){ //TODO: id - assignment doesn't cover deletion of nodes (gap!)
+                nodes.add({id: nodeId, x:pos.x, y: pos.y, label: 'Pi #' + nodeId ,shape: "image", image: images.router, shadow: true, physics:false});
               }else if(ui.draggable[0].id === "imgServer"){
-                nodes.add({id: nodes.length + 1, x:pos.x, y: pos.y, label: '',shape: "image", image: images.server, shadow: true, physics:false});
+                nodes.add({id: nodeId, x:pos.x, y: pos.y, label: 'Pi #' + nodeId ,shape: "image", image: images.server, shadow: true, physics:false});
               }else if(ui.draggable[0].id === "imgClient"){
-                nodes.add({id: nodes.length + 1, x:pos.x, y: pos.y, label: '',shape: "image", image: images.client, shadow: true, physics:false});
+                nodes.add({id: nodeId, x:pos.x, y: pos.y, label: 'Pi #' + nodeId ,shape: "image", image: images.client, shadow: true, physics:false});
               }
               network.redraw();
             }
         });
+
+				$( "body" ).keyup(function(event) {
+					if(event.key === "Delete"){
+						// delete all selected Nodes from graph
+						network.getSelectedNodes().forEach(function(nodeId){
+							nodes.remove({id: nodeId});
+							console.log("deleted Pi #" + nodeId);
+						});
+					}
+				});
 
         // add buttons for toggling traffic / rtLog - watching on or off
         $('#legendList').append('<li class="list-group-item"><div id="btnGrp">'+
@@ -134,4 +148,13 @@ function drawLegend(){
               changeModeOfOperation(false,mode.rtlog);
             }
           });*/
+}
+
+// returns the smallest, available node-id
+function getNextFreeId(){
+		var i = 0;
+		while(nodes.get(i)){
+			i += 1;
+		}
+		return i;
 }
