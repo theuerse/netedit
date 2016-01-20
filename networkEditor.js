@@ -150,10 +150,30 @@ function drawLegend(){
 				});
 
         // add buttons for toggling traffic / rtLog - watching on or off
-        $('#legendList').append('<li class="list-group-item"><button id="genBtn">A button element</button></li>');
+        $('#legendList').append('<li class="list-group-item"><button id="genBtn">generate file</button></li>');
         $('#genBtn').button().click(function(event){
 					console.log("generating / displaying network-topology");
+					console.log(getTopologyFile());
 				});
+}
+
+function getTopologyFile(){
+	var fileBuffer = [];
+	fileBuffer.push("#number of nodes");
+	fileBuffer.push(nodes.length); // e.g. 20
+	fileBuffer.push("#nodes setting (n1,n2,bandwidth in kbits a -> b, bandwidth in kbits a <- b, delay a -> b in ms, delay b -> a in ms");
+	/*0,4,4225,4802,17,18
+	3,5,4883,4017,13,6
+	4,6,4899,4746,16,7
+	2,7,4059,4815,14,14
+	0,8,4471,4800,10,9*/
+	fileBuffer.push("#properties (Client, Server)");
+	/*4,18
+	8,10
+	13,9*/
+	fileBuffer.push("#eof //do not delete this");
+	// ending newline?
+	return fileBuffer.join("\n");
 }
 
 // returns the smallest, available node-id
