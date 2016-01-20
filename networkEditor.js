@@ -150,21 +150,10 @@ function drawLegend(){
 				});
 
         // add buttons for toggling traffic / rtLog - watching on or off
-        $('#legendList').append('<li class="list-group-item"><div id="btnGrp">'+
-            '<label for="generateBtn">generate file</label><input type="checkbox" id="generateBtn"/>' +
-        '</div></li>');
-
-        $('#btnGrp').buttonset();
-
-      /*  $('#generateBtn').bind('change', function(){
-          if($(this).is(':checked')){
-              $(this).button('option', 'label', "ignore traffic");
-              changeModeOfOperation(true,mode.rtlog);
-            }else{
-              $(this).button('option', 'label', "watch traffic");
-              changeModeOfOperation(false,mode.rtlog);
-            }
-          });*/
+        $('#legendList').append('<li class="list-group-item"><button id="genBtn">A button element</button></li>');
+        $('#genBtn').button().click(function(event){
+					console.log("generating / displaying network-topology");
+				});
 }
 
 // returns the smallest, available node-id
