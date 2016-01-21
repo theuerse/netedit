@@ -26,3 +26,7 @@ html, body {
 #legendList li {
 	margin-top: 5px;
 }
+
+.settingBox {
+	margin-top: 20px;
+}

@@ -174,7 +174,50 @@ function drawLegend(){
 				$('#legendList').append('<li id="edgeInfoItem" class="list-group-item"><button id="editEdgeInfoBtn">edit edge info</button></li>');
 				$('#editEdgeInfoBtn').button().click(function(event){
 					console.log("editing edge info");
+					// TODO: show modal dialog in which the edge-params can be specified
+					$( "#edgeDialog" ).dialog({
+						resizable: true,
+						width: 600,
+						height:500,
+						modal: true,
+						open: function(event, ui){
+								var selectedEdgeId = network.getSelectedEdges()[0];
+								var edge = edges.get(selectedEdgeId);
+								var arrowRight = '<span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>';
+							  var arrowLeft = '<span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>';
 
+								console.log(selectedEdgeId);
+								console.log(edge);
+
+				    		// setup edit - elements / display edge characteristics
+								// update title
+								$("#edgeTitle").html("Pi #" + edge.from + '&emsp;' + arrowLeft +  arrowRight +' &emsp;' + "Pi #" + edge.to);
+
+								// update BandwidthRight-slider
+								$( "#bandwidthRightSlider" ).slider({
+									value:2000,
+									min: 50,
+									max: 8000,
+									step: 50,
+									slide: function( event, ui ) {
+										$( "#bandwidthRight" ).val(ui.value + " [kbps]");
+									}
+								});
+								$( "#bandwidthRight" ).val($( "#bandwidthRightSlider" ).slider( "value" ) + " [kbps]");
+
+				    },
+						buttons: {
+							"Ok": function() {
+								// update edge-information (of currently selected edge)
+								console.log("saving changes to edge");
+								$( this ).dialog( "close" );
+							},
+							Cancel: function() {
+								// throw away changes
+								$( this ).dialog( "close" );
+							}
+						}
+					});
 					/*edgeInformation[edgeId]={from: edgeInfo[0], to: edgeInfo[1], bandwidthRight: edgeInfo[2],
 						bandwidthLeft: edgeInfo[3], delayRight: edgeInfo[4], delayLeft: edgeInfo[5], initialWidth: width,
 						traffic: undefined};*/
