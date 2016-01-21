@@ -11,6 +11,7 @@ var lengendWidth;
 var nodes;
 var edges;
 var network;
+var edgeInformation = {};
 
 
  	// colors of BYR color wheel, order changed
@@ -75,7 +76,26 @@ function initNetwork(){
 		manipulation: {
 			initiallyActive: true,
 			addNode: false,
-			addEdge: false
+			addEdge: function (data, callback) {
+				 if (data.from === data.to) {
+					 var r = confirm("Do you want to connect the node to itself?");
+					 if (r === true) {
+						 callback(data);
+					 }
+				 }
+				 else {
+					// check if there is already a edge from here to there
+					 if(!isEdgeAlreadyPresent(data.from, data.to)){
+						 callback(data);
+					 }
+				 }
+			},
+			editEdge: function(data, callback){
+				 // check if there is already a edge from here to there
+				if(isEdgeAlreadyPresent(data.from, data.to) || (data.to === data.from)){
+					callback(null);
+				}
+			}
 		}
   };
 
@@ -154,6 +174,11 @@ function drawLegend(){
 				$('#legendList').append('<li id="edgeInfoItem" class="list-group-item"><button id="editEdgeInfoBtn">edit edge info</button></li>');
 				$('#editEdgeInfoBtn').button().click(function(event){
 					console.log("editing edge info");
+
+					/*edgeInformation[edgeId]={from: edgeInfo[0], to: edgeInfo[1], bandwidthRight: edgeInfo[2],
+						bandwidthLeft: edgeInfo[3], delayRight: edgeInfo[4], delayLeft: edgeInfo[5], initialWidth: width,
+						traffic: undefined};*/
+
 				});
 				$("#edgeInfoItem").hide();
 
@@ -184,6 +209,22 @@ function getTopologyFile(){
 	fileBuffer.push("#eof //do not delete this");
 	// ending newline?
 	return fileBuffer.join("\n");
+}
+
+// checks if a given connection has already be made by a previously added edge
+function isEdgeAlreadyPresent(from, to){
+	var edges = network.body.data.edges;
+	var allEdges = edges.get({returnType:"Object"});
+
+  var edge;
+
+	for(var edgeId in allEdges) {
+		edge = allEdges[edgeId];
+		if(((edge.from === from) && (edge.to === to)) || ((edge.to === from) && (edge.from === to))){
+			return true;
+		}
+	}
+	return false;
 }
 
 // returns the smallest, available node-id
