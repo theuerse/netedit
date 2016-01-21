@@ -178,7 +178,7 @@ function drawLegend(){
 					$( "#edgeDialog" ).dialog({
 						resizable: true,
 						width: 600,
-						height:500,
+						height:430,
 						modal: true,
 						open: function(event, ui){
 								var selectedEdgeId = network.getSelectedEdges()[0];
@@ -204,6 +204,42 @@ function drawLegend(){
 									}
 								});
 								$( "#bandwidthRight" ).val($( "#bandwidthRightSlider" ).slider( "value" ) + " [kbps]");
+
+								// update BandwidthLeft-slider
+								$( "#bandwidthLeftSlider" ).slider({
+									value:2000,
+									min: 50,
+									max: 8000,
+									step: 50,
+									slide: function( event, ui ) {
+										$( "#bandwidthLeft" ).val(ui.value + " [kbps]");
+									}
+								});
+								$( "#bandwidthLeft" ).val($( "#bandwidthLeftSlider" ).slider( "value" ) + " [kbps]");
+
+								// update delayRight - slider
+								$( "#delayRightSlider" ).slider({
+									value:20,
+									min: 0,
+									max: 100,
+									step: 1,
+									slide: function( event, ui ) {
+										$( "#delayRight" ).val(ui.value + " [ms]");
+									}
+								});
+								$( "#delayRight" ).val($( "#delayRightSlider" ).slider( "value" ) + " [ms]");
+
+								// update delayLeft - slider
+								$( "#delayLeftSlider" ).slider({
+									value:20,
+									min: 0,
+									max: 100,
+									step: 1,
+									slide: function( event, ui ) {
+										$( "#delayLeft" ).val(ui.value + " [ms]");
+									}
+								});
+								$( "#delayLeft" ).val($( "#delayLeftSlider" ).slider( "value" ) + " [ms]");
 
 				    },
 						buttons: {
