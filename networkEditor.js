@@ -19,7 +19,7 @@ var arrowLeft = '<span class="glyphicon glyphicon-arrow-left" aria-hidden="true"
 
  	// colors of BYR color wheel, order changed
 var colors = ["#0247fe","#8601af","#66b032","#fe2712","#fefe33","#fb9902",
-		      "#0392ce","#3d01a4","#d0ea2b","#a7194b","#66b032","#fabc02"];
+		      "#0392ce","#3d01a4","#d0ea2b","#a7194b","#fabc02"]; //TODO: #66b032 was duplcated! -> correct in netvis as well!
 
 
 
@@ -142,11 +142,11 @@ function drawLegend(){
               var pos = network.DOMtoCanvas({x: mousePosition.x - lengendWidth, y: mousePosition.y});
 							var nodeId = getNextFreeId();
               if(ui.draggable[0].id === "imgRouter"){ //TODO: id - assignment doesn't cover deletion of nodes (gap!)
-                nodes.add({id: nodeId, x:pos.x, y: pos.y, label: 'Pi #' + nodeId ,shape: "image", image: images.router, shadow: true, physics:false});
+                nodes.add({id: nodeId, x:pos.x, y: pos.y, label: 'Pi #' + nodeId ,shape: "image", font: "20px arial black", image: images.router, shadow: true, physics:false});
               }else if(ui.draggable[0].id === "imgServer"){
-                nodes.add({id: nodeId, x:pos.x, y: pos.y, label: 'Pi #' + nodeId ,shape: "image", image: images.server, shadow: true, physics:false});
+                nodes.add({id: nodeId, x:pos.x, y: pos.y, label: 'Pi #' + nodeId ,shape: "image", font: "20px arial black", image: images.server, shadow: true, physics:false});
               }else if(ui.draggable[0].id === "imgClient"){
-                nodes.add({id: nodeId, x:pos.x, y: pos.y, label: 'Pi #' + nodeId ,shape: "image", image: images.client, shadow: true, physics:false});
+                nodes.add({id: nodeId, x:pos.x, y: pos.y, label: 'Pi #' + nodeId ,shape: "image", font: "20px arial black", image: images.client, shadow: true, physics:false});
               }
               network.redraw();
             }
@@ -157,11 +157,9 @@ function drawLegend(){
 						// delete all selected Nodes from graph
 						network.getSelectedNodes().forEach(function(nodeId){
 							nodes.remove({id: nodeId});
-							console.log("deleted Pi #" + nodeId);
 						});
 						network.getSelectedEdges().forEach(function(edgeId){
 							edges.remove({id: edgeId});
-							console.log("deleted edge #" + edgeId);
 						});
 					}
 				});
@@ -185,6 +183,15 @@ function drawLegend(){
 				});
 				$("#edgeInfoItem").hide();
 
+				// add group (color) - selector
+				$('#legendList').append('<li id="nodeGroupItem" class="list-group-item"><label for="number">group:</label><select id="grpSelect"></select></li>');
+
+				$( "#grpSelect" ).change(function() {
+					if(network.getSelectedNodes().length === 1){
+						nodes.update([{id: network.getSelectedNodes()[0], font: "20px arial " + $( this ).val()}]);
+					}
+				});
+				$("#nodeGroupItem").hide();
 
 				// Only show option to edit edge-connection info when the user has currently selected an edge
 				network.on("selectEdge", function(params){
@@ -192,6 +199,22 @@ function drawLegend(){
 				});
 				network.on("deselectEdge", function(params){
 					$("#edgeInfoItem").hide();
+				});
+
+				// Only show grou select when the user has currently selected an node
+				network.on("selectNode", function(params){
+					if(network.getSelectedNodes().length === 1){
+							var font = nodes.get(network.getSelectedNodes()[0]).font;
+							var options = ['<option value="#000000">none</option>'];
+							colors.forEach(function(color){
+								options.push('<option ' + ((font.indexOf(color) > -1) ? "selected " :"") +'value="' + color + '" style="background:'+ color + '">' + options.length + '</option>');
+							});
+							$("#grpSelect").html(options.join("\n"));
+					}
+					$("#nodeGroupItem").show();
+				});
+				network.on("deselectNode", function(params){
+					$("#nodeGroupItem").hide();
 				});
 
 				network.on("doubleClick", function(params){
