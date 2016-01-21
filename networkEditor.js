@@ -84,8 +84,7 @@ function initNetwork(){
 					// check if there is already a edge from here to there
 					 if(!isEdgeAlreadyPresent(data.from, data.to)){
 						 callback(data);
-						 edgeInformation[data.id] = {from: data.from , to: data.to, bandwidthRight: 2000,
-	 						bandwidthLeft: 2000, delayRight: 5, delayLeft: 5};
+						 edgeInformation[data.id] = {bandwidthRight: 2000, bandwidthLeft: 2000, delayRight: 5, delayLeft: 5};
 					 }
 				 }
 			},
@@ -226,14 +225,17 @@ function drawLegend(){
 
 function getTopologyFile(){
 	var fileBuffer = [];
+	var info;
 	fileBuffer.push("#number of nodes");
 	fileBuffer.push(nodes.length); // e.g. 20
+
 	fileBuffer.push("#nodes setting (n1,n2,bandwidth in kbits a -> b, bandwidth in kbits a <- b, delay a -> b in ms, delay b -> a in ms");
-	/*0,4,4225,4802,17,18
-	3,5,4883,4017,13,6
-	4,6,4899,4746,16,7
-	2,7,4059,4815,14,14
-	0,8,4471,4800,10,9*/
+	edges.forEach(function(edge){
+		info = edgeInformation[edge.id];
+		fileBuffer.push(edge.from + "," + edge.to + "," + info.bandwidthRight + "," +
+	  	info.bandwidthLeft + "," + info.delayRight + "," + info.delayLeft);
+	});
+
 	fileBuffer.push("#properties (Client, Server)");
 	/*4,18
 	8,10
