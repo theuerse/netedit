@@ -77,16 +77,12 @@ function initNetwork(){
 			initiallyActive: true,
 			addNode: false,
 			addEdge: function (data, callback) {
-				 if (data.from === data.to) {
-					 var r = confirm("Do you want to connect the node to itself?");
-					 if (r === true) {
-						 callback(data);
-					 }
-				 }
-				 else {
+				 if(data.from !== data.to) {
 					// check if there is already a edge from here to there
 					 if(!isEdgeAlreadyPresent(data.from, data.to)){
 						 callback(data);
+						 edgeInformation[data.id] = {from: data.from , to: data.to, bandwidthRight: 2000,
+	 						bandwidthLeft: 2000, delayRight: 5, delayLeft: 5};
 					 }
 				 }
 			},
@@ -183,6 +179,8 @@ function drawLegend(){
 						open: function(event, ui){
 								var selectedEdgeId = network.getSelectedEdges()[0];
 								var edge = edges.get(selectedEdgeId);
+								var edgeInfo = edgeInformation[selectedEdgeId];
+
 								var arrowRight = '<span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>';
 							  var arrowLeft = '<span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>';
 
@@ -195,7 +193,7 @@ function drawLegend(){
 
 								// update BandwidthRight-slider
 								$( "#bandwidthRightSlider" ).slider({
-									value:2000,
+									value:edgeInfo.bandwidthRight,
 									min: 50,
 									max: 8000,
 									step: 50,
@@ -207,7 +205,7 @@ function drawLegend(){
 
 								// update BandwidthLeft-slider
 								$( "#bandwidthLeftSlider" ).slider({
-									value:2000,
+									value:edgeInfo.bandwidthLeft,
 									min: 50,
 									max: 8000,
 									step: 50,
@@ -219,7 +217,7 @@ function drawLegend(){
 
 								// update delayRight - slider
 								$( "#delayRightSlider" ).slider({
-									value:20,
+									value: edgeInfo.delayRight,
 									min: 0,
 									max: 100,
 									step: 1,
@@ -231,7 +229,7 @@ function drawLegend(){
 
 								// update delayLeft - slider
 								$( "#delayLeftSlider" ).slider({
-									value:20,
+									value:edgeInfo.delayLeft,
 									min: 0,
 									max: 100,
 									step: 1,
@@ -245,7 +243,12 @@ function drawLegend(){
 						buttons: {
 							"Ok": function() {
 								// update edge-information (of currently selected edge)
-								console.log("saving changes to edge");
+								var selectedEdgeId = network.getSelectedEdges()[0];
+
+								edgeInformation[selectedEdgeId].bandwidthRight = $( "#bandwidthRightSlider" ).slider( "value" );
+								edgeInformation[selectedEdgeId].bandwidthLeft = $("#bandwidthLeftSlider").slider("value");
+								edgeInformation[selectedEdgeId].delayRight = $("#delayRightSlider").slider("value");
+								edgeInformation[selectedEdgeId].delayLeft = $("#delayLeftSlider").slider("value");
 								$( this ).dialog( "close" );
 							},
 							Cancel: function() {
