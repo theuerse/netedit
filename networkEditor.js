@@ -75,17 +75,7 @@ function initNetwork(){
 		manipulation: {
 			initiallyActive: true,
 			addNode: false,
-			addEdge: function (data, callback) {
-			 if (data.from == data.to) {
-				 var r = confirm("Do you want to connect the node to itself?");
-				 if (r === true) {
-					 callback(data);
-				 }
-			 }
-			 else {
-				 callback(data);
-			 }
-			}
+			addEdge: false
 		}
   };
 
@@ -154,6 +144,26 @@ function drawLegend(){
         $('#genBtn').button().click(function(event){
 					console.log("generating / displaying network-topology");
 					console.log(getTopologyFile());
+				});
+
+				$('#legendList').append('<li class="list-group-item"><button id="addEdgeBtn">add edge</button></li>');
+				$('#addEdgeBtn').button().click(function(event){
+					network.addEdgeMode();
+				});
+
+				$('#legendList').append('<li id="edgeInfoItem" class="list-group-item"><button id="editEdgeInfoBtn">edit edge info</button></li>');
+				$('#editEdgeInfoBtn').button().click(function(event){
+					console.log("editing edge info");
+				});
+				$("#edgeInfoItem").hide();
+
+
+				// Only show option to edit edge-connection info when the user has currently selected an edge
+				network.on("selectEdge", function(params){
+					$("#edgeInfoItem").show();
+				});
+				network.on("deselectEdge", function(params){
+					$("#edgeInfoItem").hide();
 				});
 }
 
