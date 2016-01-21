@@ -14,8 +14,11 @@ var network;
 var edgeInformation = {};
 
 
+var arrowRight = '<span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>';
+var arrowLeft = '<span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>';
+
  	// colors of BYR color wheel, order changed
-	var colors = ["#0247fe","#8601af","#66b032","#fe2712","#fefe33","#fb9902",
+var colors = ["#0247fe","#8601af","#66b032","#fe2712","#fefe33","#fb9902",
 		      "#0392ce","#3d01a4","#d0ea2b","#a7194b","#66b032","#fabc02"];
 
 
@@ -90,7 +93,15 @@ function initNetwork(){
 				 // check if there is already a edge from here to there
 				if(isEdgeAlreadyPresent(data.from, data.to) || (data.to === data.from)){
 					callback(null);
+				}else{
+					callback(data);
 				}
+			},
+			deleteEdge: function(data, callback){
+				data.edges.forEach(function(edgeId){
+					delete edgeInformation[edgeId];
+				});
+				callback(data);
 			}
 		}
   };
@@ -169,98 +180,8 @@ function drawLegend(){
 
 				$('#legendList').append('<li id="edgeInfoItem" class="list-group-item"><button id="editEdgeInfoBtn">edit edge info</button></li>');
 				$('#editEdgeInfoBtn').button().click(function(event){
-					console.log("editing edge info");
-					// TODO: show modal dialog in which the edge-params can be specified
-					$( "#edgeDialog" ).dialog({
-						resizable: true,
-						width: 600,
-						height:430,
-						modal: true,
-						open: function(event, ui){
-								var selectedEdgeId = network.getSelectedEdges()[0];
-								var edge = edges.get(selectedEdgeId);
-								var edgeInfo = edgeInformation[selectedEdgeId];
-
-								var arrowRight = '<span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>';
-							  var arrowLeft = '<span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>';
-
-								console.log(selectedEdgeId);
-								console.log(edge);
-
-				    		// setup edit - elements / display edge characteristics
-								// update title
-								$("#edgeTitle").html("Pi #" + edge.from + '&emsp;' + arrowLeft +  arrowRight +' &emsp;' + "Pi #" + edge.to);
-
-								// update BandwidthRight-slider
-								$( "#bandwidthRightSlider" ).slider({
-									value:edgeInfo.bandwidthRight,
-									min: 50,
-									max: 8000,
-									step: 50,
-									slide: function( event, ui ) {
-										$( "#bandwidthRight" ).val(ui.value + " [kbps]");
-									}
-								});
-								$( "#bandwidthRight" ).val($( "#bandwidthRightSlider" ).slider( "value" ) + " [kbps]");
-
-								// update BandwidthLeft-slider
-								$( "#bandwidthLeftSlider" ).slider({
-									value:edgeInfo.bandwidthLeft,
-									min: 50,
-									max: 8000,
-									step: 50,
-									slide: function( event, ui ) {
-										$( "#bandwidthLeft" ).val(ui.value + " [kbps]");
-									}
-								});
-								$( "#bandwidthLeft" ).val($( "#bandwidthLeftSlider" ).slider( "value" ) + " [kbps]");
-
-								// update delayRight - slider
-								$( "#delayRightSlider" ).slider({
-									value: edgeInfo.delayRight,
-									min: 0,
-									max: 100,
-									step: 1,
-									slide: function( event, ui ) {
-										$( "#delayRight" ).val(ui.value + " [ms]");
-									}
-								});
-								$( "#delayRight" ).val($( "#delayRightSlider" ).slider( "value" ) + " [ms]");
-
-								// update delayLeft - slider
-								$( "#delayLeftSlider" ).slider({
-									value:edgeInfo.delayLeft,
-									min: 0,
-									max: 100,
-									step: 1,
-									slide: function( event, ui ) {
-										$( "#delayLeft" ).val(ui.value + " [ms]");
-									}
-								});
-								$( "#delayLeft" ).val($( "#delayLeftSlider" ).slider( "value" ) + " [ms]");
-
-				    },
-						buttons: {
-							"Ok": function() {
-								// update edge-information (of currently selected edge)
-								var selectedEdgeId = network.getSelectedEdges()[0];
-
-								edgeInformation[selectedEdgeId].bandwidthRight = $( "#bandwidthRightSlider" ).slider( "value" );
-								edgeInformation[selectedEdgeId].bandwidthLeft = $("#bandwidthLeftSlider").slider("value");
-								edgeInformation[selectedEdgeId].delayRight = $("#delayRightSlider").slider("value");
-								edgeInformation[selectedEdgeId].delayLeft = $("#delayLeftSlider").slider("value");
-								$( this ).dialog( "close" );
-							},
-							Cancel: function() {
-								// throw away changes
-								$( this ).dialog( "close" );
-							}
-						}
-					});
-					/*edgeInformation[edgeId]={from: edgeInfo[0], to: edgeInfo[1], bandwidthRight: edgeInfo[2],
-						bandwidthLeft: edgeInfo[3], delayRight: edgeInfo[4], delayLeft: edgeInfo[5], initialWidth: width,
-						traffic: undefined};*/
-
+					// show modal dialog in which the edge-params can be specified
+					showEdgeParameterEditDialog();
 				});
 				$("#edgeInfoItem").hide();
 
@@ -271,6 +192,12 @@ function drawLegend(){
 				});
 				network.on("deselectEdge", function(params){
 					$("#edgeInfoItem").hide();
+				});
+
+				network.on("doubleClick", function(params){
+					if(params.edges.length === 1){
+						showEdgeParameterEditDialog();
+					}
 				});
 }
 
@@ -316,4 +243,86 @@ function getNextFreeId(){
 			i += 1;
 		}
 		return i;
+}
+
+function showEdgeParameterEditDialog(){
+	$( "#edgeDialog" ).dialog({
+		resizable: true,
+		width: 600,
+		height:430,
+		modal: true,
+		open: function(event, ui){
+				var selectedEdgeId = network.getSelectedEdges()[0];
+				var edge = edges.get(selectedEdgeId);
+				var edgeInfo = edgeInformation[selectedEdgeId];
+
+				// setup edit - elements / display edge characteristics
+				$("#edgeTitle").html("Pi #" + edge.from + '&emsp;' + arrowLeft +  arrowRight +' &emsp;' + "Pi #" + edge.to);
+
+				// update BandwidthRight-slider
+				$( "#bandwidthRightSlider" ).slider({
+					value:edgeInfo.bandwidthRight,
+					min: 50,
+					max: 8000,
+					step: 50,
+					slide: function( event, ui ) {
+						$( "#bandwidthRight" ).val(ui.value + " [kbps]");
+					}
+				});
+				$( "#bandwidthRight" ).val($( "#bandwidthRightSlider" ).slider( "value" ) + " [kbps]");
+
+				// update BandwidthLeft-slider
+				$( "#bandwidthLeftSlider" ).slider({
+					value:edgeInfo.bandwidthLeft,
+					min: 50,
+					max: 8000,
+					step: 50,
+					slide: function( event, ui ) {
+						$( "#bandwidthLeft" ).val(ui.value + " [kbps]");
+					}
+				});
+				$( "#bandwidthLeft" ).val($( "#bandwidthLeftSlider" ).slider( "value" ) + " [kbps]");
+
+				// update delayRight - slider
+				$( "#delayRightSlider" ).slider({
+					value: edgeInfo.delayRight,
+					min: 0,
+					max: 100,
+					step: 1,
+					slide: function( event, ui ) {
+						$( "#delayRight" ).val(ui.value + " [ms]");
+					}
+				});
+				$( "#delayRight" ).val($( "#delayRightSlider" ).slider( "value" ) + " [ms]");
+
+				// update delayLeft - slider
+				$( "#delayLeftSlider" ).slider({
+					value:edgeInfo.delayLeft,
+					min: 0,
+					max: 100,
+					step: 1,
+					slide: function( event, ui ) {
+						$( "#delayLeft" ).val(ui.value + " [ms]");
+					}
+				});
+				$( "#delayLeft" ).val($( "#delayLeftSlider" ).slider( "value" ) + " [ms]");
+
+		},
+		buttons: {
+			"Ok": function() {
+				// update edge-information (of currently selected edge)
+				var selectedEdgeId = network.getSelectedEdges()[0];
+
+				edgeInformation[selectedEdgeId].bandwidthRight = $( "#bandwidthRightSlider" ).slider( "value" );
+				edgeInformation[selectedEdgeId].bandwidthLeft = $("#bandwidthLeftSlider").slider("value");
+				edgeInformation[selectedEdgeId].delayRight = $("#delayRightSlider").slider("value");
+				edgeInformation[selectedEdgeId].delayLeft = $("#delayLeftSlider").slider("value");
+				$( this ).dialog( "close" );
+			},
+			Cancel: function() {
+				// throw away changes
+				$( this ).dialog( "close" );
+			}
+		}
+	});
 }
