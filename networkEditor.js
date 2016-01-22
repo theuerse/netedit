@@ -8,6 +8,7 @@ var images = {
 
 var lengendWidth;
 
+var maxNumberOfNodes = 20;
 var nodes;
 var edges;
 var network;
@@ -139,6 +140,9 @@ function drawLegend(){
 
         // handle incoming drops from the legend / toolbox
         $( "#graphContainer" ).droppable({
+						accept: function(el) {
+							return (nodes.length < maxNumberOfNodes); // only allow to add up to maxNumberOfNodes nodes
+						},
             drop: function( event, ui ) {
               var pos = network.DOMtoCanvas({x: mousePosition.x - lengendWidth, y: mousePosition.y});
 							var nodeId = getNextFreeId();
