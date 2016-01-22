@@ -85,6 +85,7 @@ function initNetwork(){
 					 if(!isEdgeAlreadyPresent(data.from, data.to)){
 						 callback(data);
 						 edgeInformation[data.id] = {bandwidthRight: 2000, bandwidthLeft: 2000, delayRight: 5, delayLeft: 5};
+						 updateEdgeWidth();
 					 }
 				 }
 			},
@@ -100,6 +101,7 @@ function initNetwork(){
 				data.edges.forEach(function(edgeId){
 					delete edgeInformation[edgeId];
 				});
+				updateEdgeWidth();
 				callback(data);
 			}
 		}
@@ -270,6 +272,37 @@ function getNextFreeId(){
 		return i;
 }
 
+// changes the respective width of edges according to the relation
+// of their specified bandwith to the overall maximum bandwith
+function updateEdgeWidth(){
+	var maxBandwidth = getMaxBandwidth();
+	var edges = network.body.data.edges;
+	var allEdges = edges.get({returnType:"Object"});
+
+	var edge;
+	var info;
+	var updateArray= [];
+
+	for(var edgeId in allEdges) {
+		info = edgeInformation[edgeId];
+		if(info === undefined) continue;
+		edge = allEdges[edgeId];
+		edge.width =  ((((info.bandwidthRight, info.bandwidthLeft) / 2)/ maxBandwidth) * 10);
+		updateArray.push(edge);
+	}
+
+	edges.update(updateArray);
+}
+
+// returns the overall maximum-bandwidth to be found in the edgeInformation
+function getMaxBandwidth(){
+	var maxBandwidth = 0;
+	Object.keys(edgeInformation).forEach(function(key,index) {
+		maxBandwidth = Math.max(maxBandwidth,Math.max(edgeInformation[key].bandwidthRight, edgeInformation[key].bandwidthLeft));
+	});
+	return maxBandwidth;
+}
+
 function showEdgeParameterEditDialog(){
 	$( "#edgeDialog" ).dialog({
 		resizable: true,
@@ -343,6 +376,7 @@ function showEdgeParameterEditDialog(){
 				edgeInformation[selectedEdgeId].delayRight = $("#delayRightSlider").slider("value");
 				edgeInformation[selectedEdgeId].delayLeft = $("#delayLeftSlider").slider("value");
 				$( this ).dialog( "close" );
+				updateEdgeWidth(); // adapt to possible changes in bandwidth
 			},
 			Cancel: function() {
 				// throw away changes
