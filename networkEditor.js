@@ -143,11 +143,11 @@ function drawLegend(){
               var pos = network.DOMtoCanvas({x: mousePosition.x - lengendWidth, y: mousePosition.y});
 							var nodeId = getNextFreeId();
               if(ui.draggable[0].id === "imgRouter"){ //TODO: id - assignment doesn't cover deletion of nodes (gap!)
-                nodes.add({id: nodeId, x:pos.x, y: pos.y, label: 'Pi #' + nodeId ,shape: "image", font: "20px arial black", image: images.router, shadow: true, physics:false});
+                nodes.add({id: nodeId, x:pos.x, y: pos.y, label: 'Pi #' + nodeId, color: '#3c87eb', group: "router", shape: "image", font: "20px arial #000000", image: images.router, shadow: true, physics:false});
               }else if(ui.draggable[0].id === "imgServer"){
-                nodes.add({id: nodeId, x:pos.x, y: pos.y, label: 'Pi #' + nodeId ,shape: "image", font: "20px arial black", image: images.server, shadow: true, physics:false});
+                nodes.add({id: nodeId, x:pos.x, y: pos.y, label: 'Pi #' + nodeId, color: '#3c87eb', group: "server", shape: "image", font: "20px arial #000000", image: images.server, shadow: true, physics:false});
               }else if(ui.draggable[0].id === "imgClient"){
-                nodes.add({id: nodeId, x:pos.x, y: pos.y, label: 'Pi #' + nodeId ,shape: "image", font: "20px arial black", image: images.client, shadow: true, physics:false});
+                nodes.add({id: nodeId, x:pos.x, y: pos.y, label: 'Pi #' + nodeId, color: '#3c87eb', group: "client", shape: "image", font: "20px arial #000000", image: images.client, shadow: true, physics:false});
               }
               network.redraw();
             }
@@ -204,11 +204,13 @@ function drawLegend(){
 
 				// Only show grou select when the user has currently selected an node
 				network.on("selectNode", function(params){
+					var node = nodes.get(network.getSelectedNodes()[0]);
+					if(node.group === "router") return; // routers are in no group
+
 					if(network.getSelectedNodes().length === 1){
-							var font = nodes.get(network.getSelectedNodes()[0]).font;
 							var options = ['<option value="#000000">none</option>'];
 							colors.forEach(function(color){
-								options.push('<option ' + ((font.indexOf(color) > -1) ? "selected " :"") +'value="' + color + '" style="background:'+ color + '">' + options.length + '</option>');
+								options.push('<option ' + ((node.font.indexOf(color) > -1) ? "selected " :"") +'value="' + color + '" style="background:'+ color + '">' + options.length + '</option>');
 							});
 							$("#grpSelect").html(options.join("\n"));
 					}
@@ -255,12 +257,47 @@ function getTopologyFile(){
 	});
 
 	fileBuffer.push("#properties (Client, Server)");
-	/*4,18
-	8,10
-	13,9*/
+	var server;
+	var serversPerColor = getServerperColor();
+
+	var allNodes = network.body.data.nodes.get({returnType:"Object"});
+
+	var node;
+	var color;
+
+	for(var nodeId in allNodes) {
+		node = allNodes[nodeId];
+		if(node.group === "client"){
+			color = node.font.slice(node.font.indexOf("#"));
+			if(color !== "#000000"){ // black is the color of non-group nodes
+					if(serversPerColor[color] !== undefined){
+						fileBuffer.push(nodeId + "," + serversPerColor[color]);
+					}
+			}
+		}
+	}
 	fileBuffer.push("#eof //do not delete this");
 	// ending newline?
 	return fileBuffer.join("\n");
+}
+
+// returns a 'associative array' indexed by group-colors, containing
+// the single allowed server per group
+function getServerperColor(){
+	var serverPerColor = {}; // there can only be one server per group
+	var allNodes = network.body.data.nodes.get({returnType:"Object"});
+
+	var node;
+	var color;
+
+	for(var nodeId in allNodes) {
+		node = allNodes[nodeId];
+		if(node.group === "server"){
+			color = node.font.slice(node.font.indexOf("#"));
+			serverPerColor[color] = nodeId;
+		}
+	}
+	return serverPerColor;
 }
 
 // checks if a given connection has already be made by a previously added edge
