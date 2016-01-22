@@ -12,7 +12,7 @@ var nodes;
 var edges;
 var network;
 var edgeInformation = {};
-
+var edgeCoolTipTimeout = {};
 
 var arrowRight = '<span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>';
 var arrowLeft = '<span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>';
@@ -220,8 +220,24 @@ function drawLegend(){
 
 				network.on("doubleClick", function(params){
 					if(params.edges.length === 1){
+						cleanupEdgeCooltips();
 						showEdgeParameterEditDialog();
 					}
+				});
+
+				network.on("hoverNode", function (params) {
+						clearTimeout(edgeCoolTipTimeout);
+						cleanupEdgeCooltips();
+				});
+
+				network.on("hoverEdge", function (params) {
+		        clearTimeout(edgeCoolTipTimeout);
+		        edgeCoolTipTimeout = setTimeout(function(){showEdgeCooltip(params.edge);},600);
+		    });
+
+				network.on("blurEdge", function(params){
+						clearTimeout(edgeCoolTipTimeout);
+						hideEdgeCooltip(params.edge);
 				});
 }
 
@@ -384,4 +400,59 @@ function showEdgeParameterEditDialog(){
 			}
 		}
 	});
+}
+
+
+//
+// Edge-Cooltip Methods
+//
+
+// create and show Nodecooltip for a given client
+function showEdgeCooltip(id){
+  var edgeInfo = edgeInformation[id];
+
+	var title = 'Pi #' + edges.get(id).from + '&emsp; &#x21c4 &emsp;' + 'Pi #' + edges.get(id).to;
+	if($("#" + id).length === 0){ // add div if not already present
+		$("body").append('<div id="' + id + '" title="'+ title + '"></div>');
+
+		$('#' + id).dialog({
+			create: function(event, ui) {
+				widget = $(this).dialog("widget");
+				widget.mouseleave(function(){clearTimeout(edgeCoolTipTimeout); hideEdgeCooltip(id);});
+			},
+			open: function(event, ui){
+				// update the the tooltips content when it is (re) - opened
+				$("#" + id).html(
+					'<p>' + 'Bandwidth <b>' + arrowRight +'</b> : ' + edgeInfo.bandwidthRight + '[kbps]</p>' +
+					'<p>' + 'Bandwidth <b>' + arrowLeft +'</b> : ' + edgeInfo.bandwidthLeft + '[kbps]</p>' +
+					'<p>' + 'Delay <b>' + arrowRight + '</b> : ' + edgeInfo.delayRight + '[ms]</p>' +
+					'<p>' + 'Delay <b>' + arrowLeft + '</b> : ' + edgeInfo.delayLeft + '[ms]</p>'
+				);
+			},
+			show: {
+				effect: 'fade',
+				duration: 500
+			},
+			autoOpen: false,
+			width: 250,
+			resize: function(event, ui) { $(this).css("width","100%");},
+			position: { my: "left top", at: "left+" + mousePosition.x +" top+"+mousePosition.y, of: window }
+		});
+	}
+
+	$('#' + id).dialog("open");
+}
+
+// hides the Edge-Cooltip
+function hideEdgeCooltip(id){
+	  $("#" + id).dialog( "close" );
+}
+
+function cleanupEdgeCooltips(){
+  var edges = network.body.data.edges;
+  var allEdges = edges.get({returnType:"Object"});
+
+  for(var edgeId in allEdges) {
+    hideEdgeCooltip(edgeId);
+  }
 }
