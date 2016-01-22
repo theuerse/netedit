@@ -421,6 +421,14 @@ function showEdgeCooltip(id){
 				widget.mouseleave(function(){clearTimeout(edgeCoolTipTimeout); hideEdgeCooltip(id);});
 			},
 			open: function(event, ui){
+
+				// correct position
+				$(this).dialog("widget").position({
+	       my: 'left top',
+	       at: "left+" + mousePosition.x +" top+"+mousePosition.y,
+	       of: window
+	    });
+
 				// update the the tooltips content when it is (re) - opened
 				$("#" + id).html(
 					'<p>' + 'Bandwidth <b>' + arrowRight +'</b> : ' + edgeInfo.bandwidthRight + '[kbps]</p>' +
@@ -435,8 +443,7 @@ function showEdgeCooltip(id){
 			},
 			autoOpen: false,
 			width: 250,
-			resize: function(event, ui) { $(this).css("width","100%");},
-			position: { my: "left top", at: "left+" + mousePosition.x +" top+"+mousePosition.y, of: window }
+			resize: function(event, ui) { $(this).css("width","100%");}
 		});
 	}
 
