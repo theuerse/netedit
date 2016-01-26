@@ -31,3 +31,7 @@ html, body {
 	border-spacing: 5px;
   border-collapse: separate;
 }
+
+.controlGroup {
+	margin-top: 20px;
+}

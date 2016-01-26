@@ -48,5 +48,25 @@
 			</tr>
 		</table>
 	</div>
+
+	<div id="presetDialog" title="Edit edge preset values">
+		<p>Newly created edges will posess a random bandwidth / delay out of the given range</p>
+
+		<div class ="controlGroup">
+			<p>
+				<label for="bandwidthRange">Bandwidth will range from:</label>
+				<input type="text" id="bandwidthRange" readonly style="border:0; color:#f6931f; font-weight:bold;">
+			</p>
+			<div id="bandwidthRangeSlider"></div>
+		</div>
+
+		<div class="controlGroup">
+			<p>
+				<label for="delayRange">Delay will range from:</label>
+				<input type="text" id="delayRange" readonly style="border:0; color:#f6931f; font-weight:bold;">
+			</p>
+			<div id="delayRangeSlider"></div>
+		</div>
+	</div>
 </body>
 </html>

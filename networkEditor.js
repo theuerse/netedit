@@ -8,6 +8,9 @@ var images = {
 
 var lengendWidth;
 
+var bandwidthPresetLimits = [700,2500];
+var delayPresetLimits = [5,20];
+
 var maxNumberOfNodes = 20;
 var nodes;
 var edges;
@@ -85,7 +88,10 @@ function initNetwork(){
 					// check if there is already a edge from here to there
 					 if(!isEdgeAlreadyPresent(data.from, data.to)){
 						 callback(data);
-						 edgeInformation[data.id] = {bandwidthRight: 2000, bandwidthLeft: 2000, delayRight: 5, delayLeft: 5};
+						 edgeInformation[data.id] = {bandwidthRight: getRandomNumberWithRange(bandwidthPresetLimits[0], bandwidthPresetLimits[1]),
+							  bandwidthLeft: getRandomNumberWithRange(bandwidthPresetLimits[0], bandwidthPresetLimits[1]),
+								delayRight: getRandomNumberWithRange(delayPresetLimits[0], delayPresetLimits[1]),
+								delayLeft: getRandomNumberWithRange(delayPresetLimits[0], delayPresetLimits[1])};
 						 updateEdgeWidth();
 					 }
 				 }
@@ -169,9 +175,15 @@ function drawLegend(){
 					}
 				});
 
-        // add buttons for toggling traffic / rtLog - watching on or off
-        $('#legendList').append('<li class="list-group-item"><button id="genBtn">generate file</button></li>');
-        $('#genBtn').button().click(function(event){
+        // add buttons for various purposes
+        $('#legendList').append('<li class="list-group-item"><button id="presetBtn">edit edge presets</button></li>');
+        $('#presetBtn').button().click(function(event){
+					// show modal dialog in which the edge-presets can be edited
+					showEdgePresetEditDialog();
+				});
+
+				$('#legendList').append('<li class="list-group-item"><button id="genBtn">generate file</button></li>');
+				$('#genBtn').button().click(function(event){
 					console.log("generating / displaying network-topology");
 					console.log(getTopologyFile());
 				});
@@ -360,6 +372,63 @@ function getMaxBandwidth(){
 	return maxBandwidth;
 }
 
+// show a dialog providing the means to edit the
+// edge-presets (range for bandwidth, range for delay)
+function showEdgePresetEditDialog(){
+	$( "#presetDialog" ).dialog({
+		resizable: true,
+		width: 700,
+		height:300,
+		modal: true,
+		open: function(event, ui){
+
+			// setup bandwidth slider
+			$( "#bandwidthRangeSlider" ).slider({
+				range: true,
+				min: 1,
+				max: 8000,
+				values: [bandwidthPresetLimits[0],bandwidthPresetLimits[1]],
+				slide: function( event, ui ) {
+					$( "#bandwidthRange" ).val(ui.values[ 0 ] + "[kbps] - " + ui.values[ 1 ] +"[kbps]" );
+				}
+			});
+
+			$( "#bandwidthRange" ).val($( "#bandwidthRangeSlider" ).slider( "values", 0 ) + "[kbps]"+
+			" - " + $( "#bandwidthRangeSlider" ).slider( "values", 1 ) + "[kbps]" );
+
+
+			// setup delay slider
+			$( "#delayRangeSlider" ).slider({
+				range: true,
+				min: 0,
+				max: 100,
+				values: [delayPresetLimits[0], delayPresetLimits[1]],
+				slide: function( event, ui ) {
+					$( "#delayRange" ).val(ui.values[ 0 ] + "[ms] - " + ui.values[ 1 ] + "[ms]" );
+				}
+			});
+
+			$( "#delayRange" ).val($( "#delayRangeSlider" ).slider( "values", 0 ) + "[ms]" +
+			" - " + $( "#delayRangeSlider" ).slider( "values", 1 )+ "[ms]" );
+
+		},
+		buttons: {
+			"Ok": function() {
+				// update edge-preset information
+				bandwidthPresetLimits = $("#bandwidthRangeSlider").slider("values");
+				delayPresetLimits = $("#delayRangeSlider").slider("values");
+
+				$( this ).dialog( "close" );
+				updateEdgeWidth(); // adapt to possible changes in bandwidth
+			},
+			Cancel: function() {
+				// throw away changes
+				$( this ).dialog( "close" );
+			}
+		}
+	});
+}
+
 function showEdgeParameterEditDialog(){
 	$( "#edgeDialog" ).dialog({
 		resizable: true,
@@ -490,4 +559,9 @@ function cleanupEdgeCooltips(){
   for(var edgeId in allEdges) {
     hideEdgeCooltip(edgeId);
   }
+}
+
+// returns a random number from within the given range (inclusive)
+function getRandomNumberWithRange(min, max){
+	return Math.floor((Math.random()*(max - min + 1)) + min);
 }
