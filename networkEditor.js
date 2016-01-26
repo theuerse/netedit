@@ -110,6 +110,26 @@ function initNetwork(){
 				});
 				updateEdgeWidth();
 				callback(data);
+			},
+			// remove the edges to/from the deleted node as well
+			deleteNode: function(data, callback){
+				if(data.nodes.length === 1){
+					var candidateNode = data.nodes[0];
+
+					var allEdges = edges.get({returnType:"Object"});
+					var edge;
+					var connectedEdges = [];
+
+					for(var edgeId in allEdges) {
+						edge = allEdges[edgeId];
+						if(edge.from === candidateNode || edge.to === candidateNode){
+							connectedEdges.push(edge.id);
+						}
+					}
+
+					callback(data);
+					edges.remove(connectedEdges);
+				}
 			}
 		}
   };
@@ -430,13 +450,15 @@ function showEdgePresetEditDialog(){
 }
 
 function showEdgeParameterEditDialog(){
+	var selectedEdgeId = network.getSelectedEdges()[0];
+	if(selectedEdgeId === undefined) return; // abort when no edge is selected
+
 	$( "#edgeDialog" ).dialog({
 		resizable: true,
 		width: 350,
 		height:300,
 		modal: true,
 		open: function(event, ui){
-				var selectedEdgeId = network.getSelectedEdges()[0];
 				var edge = edges.get(selectedEdgeId);
 				var edgeInfo = edgeInformation[selectedEdgeId];
 
