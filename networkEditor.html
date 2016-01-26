@@ -25,42 +25,28 @@
 		<!-- Sub-title identifying the edge -->
 		<span id="edgeTitle"></span>
 
-
-		<!-- Bandwidth right -->
-		<div class="settingBox">
-			<p>
-  			<label for="bandwidthRight">Bandwidth <span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></label>
-  			<input type="text" id="bandwidthRight" readonly style="border:0; color:#f6931f; font-weight:bold;">
-			</p>
-			<div id="bandwidthRightSlider"></div>
-	 </div>
-
-	 <!-- Bandwidth left -->
-	 <div class="settingBox">
-		 <p>
-			 <label for="bandwidthLeft">Bandwidth <span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></label>
-			 <input type="text" id="bandwidthLeft" readonly style="border:0; color:#f6931f; font-weight:bold;">
-		 </p>
-		 <div id="bandwidthLeftSlider"></div>
-	</div>
-
-	 <!-- Delay right -->
-	 <div class="settingBox">
-		 <p>
-			 <label for="delayRight">Delay <span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></label>
-			 <input type="text" id="delayRight" readonly style="border:0; color:#f6931f; font-weight:bold;">
-		 </p>
-		 <div id="delayRightSlider"></div>
-	</div>
-
-	 <!-- Delay left -->
-	 <div class="settingBox">
-		<p>
-			<label for="delayLeft">Delay <span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></label>
-			<input type="text" id="delayLeft" readonly style="border:0; color:#f6931f; font-weight:bold;">
-		</p>
-		<div id="delayLeftSlider"></div>
- </div>
+		<table id="edgeParamTable">
+			<tr> 	<!-- Bandwidth right -->
+				<td><label for="bandwidthRight">Bandwidth <span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></label></td>
+				<td><input class="spinner" id="bandwidthRight"></td>
+				<td>[kbps]<td>
+			</tr>
+			<tr> 	<!-- Bandwidth left -->
+				<td><label for="bandwidthLeft">Bandwidth <span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></label></td>
+				<td><input class="spinner" id="bandwidthLeft"></td>
+				<td>[kbps]<td>
+			</tr>
+			<tr> 	<!-- Delay right -->
+				<td><label for="delayRight">Delay <span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></label></td>
+				<td><input class="spinner" id="delayRight"></td>
+				<td>[ms]<td>
+			</tr>
+			<tr> 	<!-- Delay left -->
+				<td><label for="delayLeft">Delay <span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></label></td>
+				<td><input class="spinner" id="delayLeft"></td>
+				<td>[ms]<td>
+			</tr>
+		</table>
 	</div>
 </body>
 </html>

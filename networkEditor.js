@@ -363,8 +363,8 @@ function getMaxBandwidth(){
 function showEdgeParameterEditDialog(){
 	$( "#edgeDialog" ).dialog({
 		resizable: true,
-		width: 600,
-		height:430,
+		width: 350,
+		height:300,
 		modal: true,
 		open: function(event, ui){
 				var selectedEdgeId = network.getSelectedEdges()[0];
@@ -374,53 +374,40 @@ function showEdgeParameterEditDialog(){
 				// setup edit - elements / display edge characteristics
 				$("#edgeTitle").html("Pi #" + edge.from + '&emsp;' + arrowLeft +  arrowRight +' &emsp;' + "Pi #" + edge.to);
 
-				// update BandwidthRight-slider
-				$( "#bandwidthRightSlider" ).slider({
-					value:edgeInfo.bandwidthRight,
-					min: 50,
-					max: 8000,
-					step: 50,
-					slide: function( event, ui ) {
-						$( "#bandwidthRight" ).val(ui.value + " [kbps]");
-					}
+				// update BandwidthRight-spinner
+				$("#bandwidthRight").spinner({ //[kbps]
+						min: 1,
+						max: 8000,
+						step: 1
 				});
-				$( "#bandwidthRight" ).val($( "#bandwidthRightSlider" ).slider( "value" ) + " [kbps]");
+				$("#bandwidthRight").spinner("value", edgeInfo.bandwidthRight);
 
-				// update BandwidthLeft-slider
-				$( "#bandwidthLeftSlider" ).slider({
-					value:edgeInfo.bandwidthLeft,
-					min: 50,
-					max: 8000,
-					step: 50,
-					slide: function( event, ui ) {
-						$( "#bandwidthLeft" ).val(ui.value + " [kbps]");
-					}
+				// update BandwidthLeft-spinner
+				$("#bandwidthLeft").spinner({
+						min: 1,
+						max: 8000,
+						step: 1
 				});
-				$( "#bandwidthLeft" ).val($( "#bandwidthLeftSlider" ).slider( "value" ) + " [kbps]");
+				$("#bandwidthLeft").spinner("value", edgeInfo.bandwidthLeft);
 
-				// update delayRight - slider
-				$( "#delayRightSlider" ).slider({
-					value: edgeInfo.delayRight,
-					min: 0,
-					max: 100,
-					step: 1,
-					slide: function( event, ui ) {
-						$( "#delayRight" ).val(ui.value + " [ms]");
-					}
+				// update delayRight - spinner
+				$("#delayRight").spinner({ //[ms]
+						min: 0,
+						max: 100,
+						step: 1
 				});
-				$( "#delayRight" ).val($( "#delayRightSlider" ).slider( "value" ) + " [ms]");
+				$("#delayRight").spinner("value", edgeInfo.delayRight);
 
-				// update delayLeft - slider
-				$( "#delayLeftSlider" ).slider({
-					value:edgeInfo.delayLeft,
-					min: 0,
-					max: 100,
-					step: 1,
-					slide: function( event, ui ) {
-						$( "#delayLeft" ).val(ui.value + " [ms]");
-					}
+
+				// update delayLeft - spinner
+				$("#delayLeft").spinner({ //[ms]
+						min: 0,
+						max: 100,
+						step: 1
 				});
-				$( "#delayLeft" ).val($( "#delayLeftSlider" ).slider( "value" ) + " [ms]");
+				$("#delayLeft").spinner("value", edgeInfo.delayLeft);
+
+				$(".spinner").css("width",50);
 
 		},
 		buttons: {
@@ -428,10 +415,10 @@ function showEdgeParameterEditDialog(){
 				// update edge-information (of currently selected edge)
 				var selectedEdgeId = network.getSelectedEdges()[0];
 
-				edgeInformation[selectedEdgeId].bandwidthRight = $( "#bandwidthRightSlider" ).slider( "value" );
-				edgeInformation[selectedEdgeId].bandwidthLeft = $("#bandwidthLeftSlider").slider("value");
-				edgeInformation[selectedEdgeId].delayRight = $("#delayRightSlider").slider("value");
-				edgeInformation[selectedEdgeId].delayLeft = $("#delayLeftSlider").slider("value");
+				edgeInformation[selectedEdgeId].bandwidthRight = $( "#bandwidthRight" ).spinner( "value" );
+				edgeInformation[selectedEdgeId].bandwidthLeft = $("#bandwidthLeft").spinner("value");
+				edgeInformation[selectedEdgeId].delayRight = $("#delayRight").spinner("value");
+				edgeInformation[selectedEdgeId].delayLeft = $("#delayLeft").spinner("value");
 				$( this ).dialog( "close" );
 				updateEdgeWidth(); // adapt to possible changes in bandwidth
 			},

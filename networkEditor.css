@@ -27,6 +27,7 @@ html, body {
 	margin-top: 5px;
 }
 
-.settingBox {
-	margin-top: 20px;
+#edgeParamTable {
+	border-spacing: 5px;
+  border-collapse: separate;
 }
