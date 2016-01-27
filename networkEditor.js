@@ -284,6 +284,7 @@ function getTopologyFile(){
 	fileBuffer.push("#properties (Client, Server)");
 	var server;
 	var serversPerColor = getServerperColor();
+	var groups = {};
 
 	var allNodes = network.body.data.nodes.get({returnType:"Object"});
 
@@ -296,11 +297,25 @@ function getTopologyFile(){
 			color = node.font.slice(node.font.indexOf("#"));
 			if(color !== "#000000"){ // black is the color of non-group nodes
 					if(serversPerColor[color] !== undefined){
-						fileBuffer.push(nodeId + "," + serversPerColor[color]);
+						// save client/server relationship in the accoring group
+						if(groups[color] === undefined){
+							groups[color] = [nodeId + "," + serversPerColor[color]];
+						}else {
+							groups[color].push(nodeId + "," + serversPerColor[color]);
+						}
 					}
 			}
 		}
 	}
+	// write client/server relations group by group (right order)
+	colors.forEach(function(color){
+			if(groups[color] !== undefined){
+				groups[color].forEach(function(entry){
+					fileBuffer.push(entry);
+				});
+			}
+	});
+
 	fileBuffer.push("#eof //do not delete this");
 	// ending newline?
 	return fileBuffer.join("\n");
