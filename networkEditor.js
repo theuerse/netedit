@@ -17,6 +17,7 @@ var edges;
 var network;
 var edgeInformation = {};
 var edgeCoolTipTimeout = {};
+var topologyFile;
 
 var arrowRight = '<span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>';
 var arrowLeft = '<span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>';
@@ -110,6 +111,7 @@ function initNetwork(){
 				});
 				updateEdgeWidth();
 				callback(data);
+				$("#edgeInfoItem").hide(); // hide edge-info-edit-btn
 			},
 			// remove the edges to/from the deleted node as well
 			deleteNode: function(data, callback){
@@ -194,8 +196,7 @@ function drawLegend(){
 				$('#legendList').append('<li class="list-group-item"><button id="genBtn">generate file</button></li>');
 				$('#genBtn').button().click(function(event){
 					if(isNetworkConnected()){
-						console.log("generating / displaying network-topology");
-						console.log(getTopologyFile());
+						makeFileAvailable(getTopologyFile());
 					}else {
 						showTopologyErrorDialog();
 					}
@@ -310,10 +311,39 @@ function getTopologyFile(){
 	return fileBuffer.join("\n");
 }
 
+// make the networkTopology-File-content available to the user
+function makeFileAvailable(fileContent){
+	var data = new Blob([fileContent], {type: 'text/plain'});
+
+	if(topologyFile !== null){
+		// manually clean up to avoid memory leaks
+		window.URL.revokeObjectURL(topologyFile);
+	}
+
+	// store locally / get url to file
+	topologyFile = window.URL.createObjectURL(data);
+	showTopologyDownloadDialog(topologyFile);
+}
+
+// display a dialog with the option to download a generated Network Topology
+function showTopologyDownloadDialog(fileUrl){
+	$("#topologyDownloadDialog").dialog({
+		modal: true,
+		width: 400,
+		buttons: {
+			Ok: function(){$(this).dialog("close");}
+		}
+	});
+
+	$("#downloadLink").attr("href", fileUrl);
+	$("#downloadLink").button();
+}
+
+// display a dialog explaining the reason the topologyFile could not be created
 function showTopologyErrorDialog(){
 	$("#topologyErrorDialog").dialog({
 		modal: true,
-		width: 400,
+		width: 450,
 		buttons: {
 			Ok: function(){$(this).dialog("close");}
 		}
