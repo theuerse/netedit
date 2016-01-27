@@ -193,8 +193,12 @@ function drawLegend(){
 
 				$('#legendList').append('<li class="list-group-item"><button id="genBtn">generate file</button></li>');
 				$('#genBtn').button().click(function(event){
-					console.log("generating / displaying network-topology");
-					console.log(getTopologyFile());
+					if(isNetworkConnected()){
+						console.log("generating / displaying network-topology");
+						console.log(getTopologyFile());
+					}else {
+						showTopologyErrorDialog();
+					}
 				});
 
 				$('#legendList').append('<li class="list-group-item"><button id="addEdgeBtn">add edge</button></li>');
@@ -304,6 +308,16 @@ function getTopologyFile(){
 	fileBuffer.push("#eof //do not delete this");
 	// ending newline?
 	return fileBuffer.join("\n");
+}
+
+function showTopologyErrorDialog(){
+	$("#topologyErrorDialog").dialog({
+		modal: true,
+		width: 400,
+		buttons: {
+			Ok: function(){$(this).dialog("close");}
+		}
+	});
 }
 
 // returns a 'associative array' indexed by group-colors, containing
@@ -575,4 +589,26 @@ function cleanupEdgeCooltips(){
 // returns a random number from within the given range (inclusive)
 function getRandomNumberWithRange(min, max){
 	return Math.floor((Math.random()*(max - min + 1)) + min);
+}
+
+// returns if all nodes of the current network are connected
+function isNetworkConnected(){
+	if(nodes.length === 0 || nodes.length === 1) return true;
+	var conectedNodes = [];
+	var queue = [nodes.get(0).id]; // init queue with first node
+	var reachedNodes = [];
+
+	while(queue.length > 0){
+		connectedNodes = network.getConnectedNodes(queue[0]);
+		for(var i = 0; i < connectedNodes.length; i++){
+			if((reachedNodes.indexOf(connectedNodes[i]) === -1) && (queue.indexOf(connectedNodes[i]) === -1)){
+				queue.push(connectedNodes[i]); // add node to queue when it isnt already present and has not been checked yet
+			}
+		}
+		reachedNodes.push(queue[0]); // we checked this node
+		queue.shift(); // remove first element in queue
+	}
+
+	// all nodes reached -> network connected
+	return (reachedNodes.length === nodes.length);
 }
