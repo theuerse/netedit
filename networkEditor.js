@@ -114,21 +114,10 @@ function initNetwork(){
 			// remove the edges to/from the deleted node as well
 			deleteNode: function(data, callback){
 				if(data.nodes.length === 1){
-					var candidateNode = data.nodes[0];
-
-					var allEdges = edges.get({returnType:"Object"});
-					var edge;
-					var connectedEdges = [];
-
-					for(var edgeId in allEdges) {
-						edge = allEdges[edgeId];
-						if(edge.from === candidateNode || edge.to === candidateNode){
-							connectedEdges.push(edge.id);
-						}
-					}
-
-					callback(data);
-					edges.remove(connectedEdges);
+					// get edges connected to node to be deletec
+					var connectedEdges = network.getConnectedEdges(data.nodes[0]);
+					callback(data); // delege node
+					edges.remove(connectedEdges); // delete connected edges
 				}
 			}
 		}
