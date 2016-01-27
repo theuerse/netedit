@@ -35,3 +35,9 @@ html, body {
 .controlGroup {
 	margin-top: 20px;
 }
+
+#fileInput {
+  visibility: hidden;
+  width: 0;
+  height: 0;
+}
