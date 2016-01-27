@@ -174,9 +174,9 @@ function drawLegend(){
             }
         });
 
-				$( "body" ).keyup(function(event) {
-					if(event.key === "Delete"){
-						// delete the currently selected node/edge
+				window.addEventListener("keyup", function (event) {
+					if(event.keyCode === 46){ // DELETE ... 46
+						// user pressed 'delete' -> delete the currently selected node/edge
 						network.deleteSelected();
 					}
 				});
