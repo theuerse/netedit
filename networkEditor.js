@@ -176,13 +176,8 @@ function drawLegend(){
 
 				$( "body" ).keyup(function(event) {
 					if(event.key === "Delete"){
-						// delete all selected Nodes from graph
-						network.getSelectedNodes().forEach(function(nodeId){
-							nodes.remove({id: nodeId});
-						});
-						network.getSelectedEdges().forEach(function(edgeId){
-							edges.remove({id: edgeId});
-						});
+						// delete the currently selected node/edge
+						network.deleteSelected();
 					}
 				});
 
