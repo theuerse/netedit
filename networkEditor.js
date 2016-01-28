@@ -24,7 +24,7 @@ var arrowLeft = '<span class="glyphicon glyphicon-arrow-left" aria-hidden="true"
 
  	// colors of BYR color wheel, order changed
 var colors = ["#0247fe","#8601af","#66b032","#fe2712","#fefe33","#fb9902",
-		      "#0392ce","#3d01a4","#d0ea2b","#a7194b","#fabc02"]; //TODO: #66b032 was duplcated! -> correct in netvis as well!
+		      "#0392ce","#3d01a4","#d0ea2b","#a7194b","#fabc02"];
 
 var options = {
 	// specify randomseed => network is the same at every startup
@@ -301,6 +301,9 @@ function addNetworkEventListeners(){
 // draws given topology-data using vis.js (data from e.g. "generated_network_top.txt")
 function drawTopology(data){
 
+	options.nodes.physics = true; // allow node-movement
+	network.setOptions(options);
+
 	var nodeData = new vis.DataSet();
 	var edgeData = new vis.DataSet();
 	// clear previous edge-information
@@ -364,6 +367,13 @@ function drawTopology(data){
 				 font: "20px arial " + colors[$.inArray(nodeInfo[1],servers)]});
 		}
 	}
+
+	// shut down node-physics when networkLayout has stabilized
+  network.once("stabilized", function(params) {
+		console.log("network stabilized!");
+		options.nodes.physics = false;
+		network.setOptions(options);
+	});
 
 	// update existing network / node- and edge-Data
 	network.setData({nodes: nodeData, edges: edgeData});
@@ -522,7 +532,7 @@ function updateEdgeWidth(){
 		info = edgeInformation[edgeId];
 		if(info === undefined) continue;
 		edge = allEdges[edgeId];
-		edge.width =  ((((info.bandwidthRight, info.bandwidthLeft) / 2)/ maxBandwidth) * 10);
+		edge.width =  ((((info.bandwidthRight + info.bandwidthLeft) / 2)/ maxBandwidth) * 6);
 		updateArray.push(edge);
 	}
 
