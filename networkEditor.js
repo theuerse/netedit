@@ -28,7 +28,7 @@ var colors = ["#0247fe","#8601af","#66b032","#fe2712","#fefe33","#fb9902",
 
 var options = {
 	// specify randomseed => network is the same at every startup
-	// layout:{randomSeed: 2},
+	layout:{randomSeed: 2},
 	autoResize: true,
 	height: '100%',
 	edges: {
@@ -122,9 +122,16 @@ var options = {
 });
 
 function initNetwork(){
+	if(network !== undefined){
+		// remove network from DOm and remove all bindings and references
+		network.destroy();
+	}
+
   nodes = new vis.DataSet();
   edges = new vis.DataSet();
 
+	clearTimeout(edgeCoolTipTimeout);
+	edgeInformation = {};
 
   var container = document.getElementById('graphContainer');
   // draw graph
@@ -189,6 +196,7 @@ function drawLegend(){
 					if(files.length > 0){
 						var reader = new FileReader();
 						reader.onload = function(theFile){
+							initNetwork();
 							drawTopology(reader.result);
 						};
 						reader.readAsText(files[0]);
@@ -292,8 +300,6 @@ function addNetworkEventListeners(){
 
 // draws given topology-data using vis.js (data from e.g. "generated_network_top.txt")
 function drawTopology(data){
-	nodes = new vis.DataSet();
-	edges = new vis.DataSet();
 
 	// process file-data
 	// seperate lines
@@ -367,7 +373,6 @@ function drawTopology(data){
 		nodes: nodes,
 		edges: edges
 	};
-
 	// draw graph
 	network = new vis.Network(container, graphData, options);
 
