@@ -196,8 +196,8 @@ function drawLegend(){
 					if(files.length > 0){
 						var reader = new FileReader();
 						reader.onload = function(theFile){
-							initNetwork();
 							drawTopology(reader.result);
+							updateEdgeWidth();
 						};
 						reader.readAsText(files[0]);
 					}
@@ -301,6 +301,11 @@ function addNetworkEventListeners(){
 // draws given topology-data using vis.js (data from e.g. "generated_network_top.txt")
 function drawTopology(data){
 
+	var nodeData = new vis.DataSet();
+	var edgeData = new vis.DataSet();
+	// clear previous edge-information
+	edgeInformation = {};
+
 	// process file-data
 	// seperate lines
 	var lines = data.split("\n");
@@ -310,7 +315,6 @@ function drawTopology(data){
 	var edgeInfo;  // holds information about a single edge
 	var nodeInfo;  // holds information about a single node
 	var servers = []; // array containing the ids of all servers
-	var groups = {}; // contains server -> clients entries
 	var numberOfNodes = 0; // total number of nodes
 
 	for(var index in lines){
@@ -323,7 +327,7 @@ function drawTopology(data){
 			// lines[index] contains number of nodes (assumed correct everytime)
 			numberOfNodes = lines[index];
 			for(i = 0; i < numberOfNodes; i++){
-			  nodes.add({id: i, group: "router", shadow: true,  color: '#3c87eb',
+			  nodeData.add({id: i, group: "router", shadow: true,  color: '#3c87eb',
 				  label: 'Pi #' + i, shape: "image", image: images.router,font: "20px arial black"});
 			}
 		}else if(part == 1){
@@ -333,7 +337,7 @@ function drawTopology(data){
       var width =  3;
 			// add edge first two entries ... connected nodes ( a -> b)
 			var edgeId = edgeInfo[0] + '-'+ edgeInfo[1];
-			edges.add({id: edgeId, from: edgeInfo[0],
+			edgeData.add({id: edgeId, from: edgeInfo[0],
 				to: edgeInfo[1], width: width, shadow: true, font: {align: 'bottom'}});
 
       edgeInformation[edgeId]={bandwidthRight: parseInt(edgeInfo[2]),bandwidthLeft: parseInt(edgeInfo[3]),
@@ -346,45 +350,25 @@ function drawTopology(data){
 			nodeInfo = lines[index].split(",");
 
 			// images from GPL licensed "Tango Desktop Project" (tango.freedesktop.org)
-			// update groups
-			if(groups[nodeInfo[1]] === undefined){
-				groups[nodeInfo[1]] = [nodeInfo[0]];
-			} else {
-				$.merge(groups[nodeInfo[1]],[nodeInfo[0]]);
-			}
 
 			// nodeInfo[1] ... id of server - node
 			if($.inArray(nodeInfo[1],servers)<0){
 				servers.push(nodeInfo[1]); // add server-id only if not already present
 			}
-			nodes.update({id: parseInt(nodeInfo[1]), label: 'Pi #' + nodeInfo[1], group: "server",
+			nodeData.update({id: parseInt(nodeInfo[1]), label: 'Pi #' + nodeInfo[1], group: "server",
 				 shadow: true, shape: "image", image: images.server, font: "20px arial " + colors[$.inArray(nodeInfo[1],servers)]});
 
 			// nodeInfo[0] ... id of client - node
-			nodes.update({id: parseInt(nodeInfo[0]), label: 'Pi #' + nodeInfo[0], group: "client",
+			nodeData.update({id: parseInt(nodeInfo[0]), label: 'Pi #' + nodeInfo[0], group: "client",
 				 shadow: true, shape: "image", image: images.client,
 				 font: "20px arial " + colors[$.inArray(nodeInfo[1],servers)]});
 		}
 	}
 
-	// Graph will be drawn in the HTML-Element "graphContainer" [<div></div>]
-	var container = document.getElementById('graphContainer');
-	var graphData = {
-		nodes: nodes,
-		edges: edges
-	};
-	// draw graph
-	network = new vis.Network(container, graphData, options);
-
-  // shut down node-physics when networkLayout has initially stabilized
-  network.once("stabilized", function(params) {
-		console.log("network stabilized!");
-		options.nodes.physics = false;
-		network.setOptions(options);
-		updateEdgeWidth();
-	});
-
-	addNetworkEventListeners();
+	// update existing network / node- and edge-Data
+	network.setData({nodes: nodeData, edges: edgeData});
+	nodes = nodeData;
+	edges = edgeData;
 }
 
 function getTopologyFile(){
