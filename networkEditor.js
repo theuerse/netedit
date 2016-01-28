@@ -8,8 +8,8 @@ var images = {
 
 var lengendWidth;
 
-var bandwidthPresetLimits = [700,2500];
-var delayPresetLimits = [5,20];
+var bandwidthPresetLimits = [2000,4000];
+var delayPresetLimits = [2,10];
 
 var maxNumberOfNodes = 20;
 var nodes;
