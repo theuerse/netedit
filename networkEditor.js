@@ -121,12 +121,8 @@ var options = {
 
 });
 
+// Initializes the network (once) at program-startup
 function initNetwork(){
-	if(network !== undefined){
-		// remove network from DOm and remove all bindings and references
-		network.destroy();
-	}
-
   nodes = new vis.DataSet();
   edges = new vis.DataSet();
 
@@ -139,14 +135,17 @@ function initNetwork(){
 
 	// zoom to 100%
 	network.moveTo({scale: 1.0});
-
 }
 
-// Draws a legend containing met-information about the networkLayout (/ Topology)
+
+//
+// Methods drawing / maintaining the UI
+//
+// Draws a legend/Toolbox containing UI-controls
 function drawLegend(){
 	  $('#legendContainer').append('<ul id="legendList" class="list-group"></ul>');
 
-
+			// add Node-Images that can be dragged onto the network in order to insert them
       $('#legendList').append('<li class="list-group-item">'+
         '<center><img class="addable" id="imgRouter" src="' + images.router +'" height="64" width="64">Router</center>'+
         '<center><img class="addable" id="imgServer" src="' + images.server +'" height="64" width="64">Router + Server</center>'+
@@ -161,7 +160,6 @@ function drawLegend(){
             appendTo: 'body',
             scroll: false
         });
-
 
         // handle incoming drops from the legend / toolbox
         $( "#graphContainer" ).droppable({
@@ -182,6 +180,7 @@ function drawLegend(){
             }
         });
 
+				// allow deletion of edges/nodes by pressing DELETE on the keyboard
 				window.addEventListener("keyup", function (event) {
 					if(event.keyCode === 46){ // DELETE ... 46
 						// user pressed 'delete' -> delete the currently selected node/edge
@@ -189,7 +188,7 @@ function drawLegend(){
 					}
 				});
 
-				// add buttons for various purposes
+				// add a FileOpen-Button
 				$('#legendList').append('<li class="list-group-item"><input  id="fileInput" type="file"/><button id="openFileBtn">choose file</button></li>');
 				$('#fileInput').change(function(event){
 					var files = event.target.files;
@@ -206,13 +205,15 @@ function drawLegend(){
 					$("#fileInput").trigger("click");
 				});
 
-        // add buttons for various purposes
+        // add a button opening a dialog for editing edge-presets
         $('#legendList').append('<li class="list-group-item"><button id="presetBtn">edit edge presets</button></li>');
         $('#presetBtn').button().click(function(event){
 					// show modal dialog in which the edge-presets can be edited
 					showEdgePresetEditDialog();
 				});
 
+				// add a button responsible to create/ let download the topology-file of the current network
+				// or show a error-dialog if the network is not connected (there exist isolated nodes)
 				$('#legendList').append('<li class="list-group-item"><button id="genBtn">generate file</button></li>');
 				$('#genBtn').button().click(function(event){
 					if(isNetworkConnected()){
@@ -222,11 +223,13 @@ function drawLegend(){
 					}
 				});
 
+				// add a generally available button to add new edges to the network
 				$('#legendList').append('<li class="list-group-item"><button id="addEdgeBtn">add edge</button></li>');
 				$('#addEdgeBtn').button().click(function(event){
 					network.addEdgeMode();
 				});
 
+				// add a button which enables the user to edit a edges parameters (bandwidth, delay), IF a edge is selected
 				$('#legendList').append('<li id="edgeInfoItem" class="list-group-item"><button id="editEdgeInfoBtn">edit edge info</button></li>');
 				$('#editEdgeInfoBtn').button().click(function(event){
 					// show modal dialog in which the edge-params can be specified
@@ -236,7 +239,6 @@ function drawLegend(){
 
 				// add group (color) - selector
 				$('#legendList').append('<li id="nodeGroupItem" class="list-group-item"><label for="number">group:</label><select id="grpSelect" class="form-control"></select></li>');
-
 				$( "#grpSelect" ).change(function() {
 					if(network.getSelectedNodes().length === 1){
 						nodes.update([{id: network.getSelectedNodes()[0], font: "20px arial " + $( this ).val()}]);
@@ -244,6 +246,7 @@ function drawLegend(){
 				});
 				$("#nodeGroupItem").hide();
 
+				// add eventhandlers to react to teh selection of nodes/edges
 				addNetworkEventListeners();
 }
 
@@ -275,6 +278,7 @@ function addNetworkEventListeners(){
 		$("#nodeGroupItem").hide();
 	});
 
+	// doubleClick on edge -> open edgeEdit-Dialog
 	network.on("doubleClick", function(params){
 		if(params.edges.length === 1){
 			cleanupEdgeCooltips();
@@ -282,11 +286,13 @@ function addNetworkEventListeners(){
 		}
 	});
 
+	// hide existing edge-Cooltips when starting to hover over a node
 	network.on("hoverNode", function (params) {
 			clearTimeout(edgeCoolTipTimeout);
 			cleanupEdgeCooltips();
 	});
 
+	// Show the edge-cooltip only when the mouse hovers over a edge
 	network.on("hoverEdge", function (params) {
 			clearTimeout(edgeCoolTipTimeout);
 			edgeCoolTipTimeout = setTimeout(function(){showEdgeCooltip(params.edge);},600);
@@ -299,9 +305,9 @@ function addNetworkEventListeners(){
 }
 
 // draws given topology-data using vis.js (data from e.g. "generated_network_top.txt")
+// used when opening pre-existing topology-files (choose file...)
 function drawTopology(data){
-
-	options.nodes.physics = true; // allow node-movement
+	options.nodes.physics = true; // (re-)allow node-movement
 	network.setOptions(options);
 
 	var nodeData = new vis.DataSet();
@@ -353,7 +359,6 @@ function drawTopology(data){
 			nodeInfo = lines[index].split(",");
 
 			// images from GPL licensed "Tango Desktop Project" (tango.freedesktop.org)
-
 			// nodeInfo[1] ... id of server - node
 			if($.inArray(nodeInfo[1],servers)<0){
 				servers.push(nodeInfo[1]); // add server-id only if not already present
@@ -369,18 +374,20 @@ function drawTopology(data){
 	}
 
 	// shut down node-physics when networkLayout has stabilized
+	// edge-physics still enabled
   network.once("stabilized", function(params) {
 		console.log("network stabilized!");
 		options.nodes.physics = false;
 		network.setOptions(options);
 	});
 
-	// update existing network / node- and edge-Data
+	// update existing network / node- and edge-Data (redraw/restabilize network)
 	network.setData({nodes: nodeData, edges: edgeData});
 	nodes = nodeData;
 	edges = edgeData;
 }
 
+// generate the content of a network-topology-file based on the current network
 function getTopologyFile(){
 	var fileBuffer = [];
 	var info;
@@ -410,7 +417,7 @@ function getTopologyFile(){
 			color = node.font.slice(node.font.indexOf("#"));
 			if(color !== "#000000"){ // black is the color of non-group nodes
 					if(serversPerColor[color] !== undefined){
-						// save client/server relationship in the accoring group
+						// save client/server relationship in the according group
 						if(groups[color] === undefined){
 							groups[color] = [nodeId + "," + serversPerColor[color]];
 						}else {
@@ -430,11 +437,10 @@ function getTopologyFile(){
 	});
 
 	fileBuffer.push("#eof //do not delete this");
-	// ending newline?
 	return fileBuffer.join("\n");
 }
 
-// make the networkTopology-File-content available to the user
+// make the networkTopology-File-content available to the user (downloadable)
 function makeFileAvailable(fileContent){
 	var data = new Blob([fileContent], {type: 'text/plain'});
 
@@ -453,12 +459,10 @@ function showTopologyDownloadDialog(fileUrl){
 	$("#topologyDownloadDialog").dialog({
 		modal: true,
 		width: 400,
-		buttons: {
-			Ok: function(){$(this).dialog("close");}
-		}
+		buttons: {Ok: function(){$(this).dialog("close");}}
 	});
 
-	$("#downloadLink").attr("href", fileUrl);
+	$("#downloadLink").attr("href", fileUrl); // update anchor-target
 	$("#downloadLink").button();
 }
 
@@ -467,54 +471,8 @@ function showTopologyErrorDialog(){
 	$("#topologyErrorDialog").dialog({
 		modal: true,
 		width: 450,
-		buttons: {
-			Ok: function(){$(this).dialog("close");}
-		}
+		buttons: {Ok: function(){$(this).dialog("close");}}
 	});
-}
-
-// returns a 'associative array' indexed by group-colors, containing
-// the single allowed server per group
-function getServerperColor(){
-	var serverPerColor = {}; // there can only be one server per group
-	var allNodes = network.body.data.nodes.get({returnType:"Object"});
-
-	var node;
-	var color;
-
-	for(var nodeId in allNodes) {
-		node = allNodes[nodeId];
-		if(node.group === "server"){
-			color = node.font.slice(node.font.indexOf("#"));
-			serverPerColor[color] = nodeId;
-		}
-	}
-	return serverPerColor;
-}
-
-// checks if a given connection has already be made by a previously added edge
-function isEdgeAlreadyPresent(from, to){
-	var edges = network.body.data.edges;
-	var allEdges = edges.get({returnType:"Object"});
-
-  var edge;
-
-	for(var edgeId in allEdges) {
-		edge = allEdges[edgeId];
-		if(((edge.from === from) && (edge.to === to)) || ((edge.to === from) && (edge.from === to))){
-			return true;
-		}
-	}
-	return false;
-}
-
-// returns the smallest, available node-id
-function getNextFreeId(){
-		var i = 0;
-		while(nodes.get(i)){
-			i += 1;
-		}
-		return i;
 }
 
 // changes the respective width of edges according to the relation
@@ -537,15 +495,6 @@ function updateEdgeWidth(){
 	}
 
 	edges.update(updateArray);
-}
-
-// returns the overall maximum-bandwidth to be found in the edgeInformation
-function getMaxBandwidth(){
-	var maxBandwidth = 0;
-	Object.keys(edgeInformation).forEach(function(key,index) {
-		maxBandwidth = Math.max(maxBandwidth,Math.max(edgeInformation[key].bandwidthRight, edgeInformation[key].bandwidthLeft));
-	});
-	return maxBandwidth;
 }
 
 // show a dialog providing the means to edit the
@@ -605,6 +554,8 @@ function showEdgePresetEditDialog(){
 	});
 }
 
+// Shows a dialog providing the means to edit the currently selected
+// edges parameters/properties (bandwidth, delay)
 function showEdgeParameterEditDialog(){
 	var selectedEdgeId = network.getSelectedEdges()[0];
 	if(selectedEdgeId === undefined) return; // abort when no edge is selected
@@ -645,7 +596,6 @@ function showEdgeParameterEditDialog(){
 				});
 				$("#delayRight").spinner("value", edgeInfo.delayRight);
 
-
 				// update delayLeft - spinner
 				$("#delayLeft").spinner({ //[ms]
 						min: 0,
@@ -654,7 +604,7 @@ function showEdgeParameterEditDialog(){
 				});
 				$("#delayLeft").spinner("value", edgeInfo.delayLeft);
 
-				$(".spinner").css("width",50);
+				$(".spinner").css("width",50); // constrain width of input-elements
 
 		},
 		buttons: {
@@ -667,7 +617,7 @@ function showEdgeParameterEditDialog(){
 				edgeInformation[selectedEdgeId].delayRight = $("#delayRight").spinner("value");
 				edgeInformation[selectedEdgeId].delayLeft = $("#delayLeft").spinner("value");
 				$( this ).dialog( "close" );
-				updateEdgeWidth(); // adapt to possible changes in bandwidth
+				updateEdgeWidth(); // display possible changes in bandwidth
 			},
 			Cancel: function() {
 				// throw away changes
@@ -682,7 +632,7 @@ function showEdgeParameterEditDialog(){
 // Edge-Cooltip Methods
 //
 
-// create and show Nodecooltip for a given client
+// create and show a edge-cooltip
 function showEdgeCooltip(id){
   var edgeInfo = edgeInformation[id];
 
@@ -718,7 +668,7 @@ function showEdgeCooltip(id){
 			},
 			autoOpen: false,
 			width: 250,
-			resize: function(event, ui) { $(this).css("width","100%");}
+			resize: function(event, ui) { $(this).css("width","100%");} // continue taking up all horiz. space
 		});
 	}
 
@@ -730,6 +680,7 @@ function hideEdgeCooltip(id){
 	  $("#" + id).dialog( "close" );
 }
 
+// hides all currently open edge-cooltips
 function cleanupEdgeCooltips(){
   var edges = network.body.data.edges;
   var allEdges = edges.get({returnType:"Object"});
@@ -739,6 +690,10 @@ function cleanupEdgeCooltips(){
   }
 }
 
+
+//
+// MISC utility methods
+//
 // returns a random number from within the given range (inclusive)
 function getRandomNumberWithRange(min, max){
 	return Math.floor((Math.random()*(max - min + 1)) + min);
@@ -770,4 +725,57 @@ function isNetworkConnected(){
 // checks if a given string starts with given prefix
 function stringStartsWith(string, prefix) {
 	return string.slice(0,prefix.length) == prefix;
+}
+
+// checks if a given connection has already be made by a previously added edge
+function isEdgeAlreadyPresent(from, to){
+	var edges = network.body.data.edges;
+	var allEdges = edges.get({returnType:"Object"});
+
+  var edge;
+
+	for(var edgeId in allEdges) {
+		edge = allEdges[edgeId];
+		if(((edge.from === from) && (edge.to === to)) || ((edge.to === from) && (edge.from === to))){
+			return true;
+		}
+	}
+	return false;
+}
+
+// returns the smallest, available node-id
+function getNextFreeId(){
+		var i = 0;
+		while(nodes.get(i)){
+			i += 1;
+		}
+		return i;
+}
+
+// returns the overall maximum-bandwidth to be found in the edgeInformation
+function getMaxBandwidth(){
+	var maxBandwidth = 0;
+	Object.keys(edgeInformation).forEach(function(key,index) {
+		maxBandwidth = Math.max(maxBandwidth,Math.max(edgeInformation[key].bandwidthRight, edgeInformation[key].bandwidthLeft));
+	});
+	return maxBandwidth;
+}
+
+// returns a 'associative array' indexed by group-colors, containing
+// the single allowed server per group
+function getServerperColor(){
+	var serverPerColor = {}; // there can only be one server per group
+	var allNodes = network.body.data.nodes.get({returnType:"Object"});
+
+	var node;
+	var color;
+
+	for(var nodeId in allNodes) {
+		node = allNodes[nodeId];
+		if(node.group === "server"){
+			color = node.font.slice(node.font.indexOf("#"));
+			serverPerColor[color] = nodeId;
+		}
+	}
+	return serverPerColor;
 }
