@@ -235,7 +235,7 @@ function drawLegend(){
 				$("#edgeInfoItem").hide();
 
 				// add group (color) - selector
-				$('#legendList').append('<li id="nodeGroupItem" class="list-group-item"><label for="number">group:</label><select id="grpSelect"></select></li>');
+				$('#legendList').append('<li id="nodeGroupItem" class="list-group-item"><label for="number">group:</label><select id="grpSelect" class="form-control"></select></li>');
 
 				$( "#grpSelect" ).change(function() {
 					if(network.getSelectedNodes().length === 1){
