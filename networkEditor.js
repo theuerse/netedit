@@ -67,6 +67,12 @@ var options = {
 							delayRight: getRandomNumberWithRange(delayPresetLimits[0], delayPresetLimits[1]),
 							delayLeft: getRandomNumberWithRange(delayPresetLimits[0], delayPresetLimits[1])};
 					 updateEdgeWidth();
+
+					 if($('#addEdgeToggle').is(':checked')){
+					 	//re-call addEdgeMode() if in 'addEdge(s)-mode', lets user add edge after edge
+						network.addEdgeMode();
+					 }
+
 				 }
 			 }
 		},
@@ -224,10 +230,19 @@ function drawLegend(){
 				});
 
 				// add a generally available button to add new edges to the network
-				$('#legendList').append('<li class="list-group-item"><button id="addEdgeBtn">add edge</button></li>');
-				$('#addEdgeBtn').button().click(function(event){
-					network.addEdgeMode();
-				});
+				$('#legendList').append('<li class="list-group-item"><label for="addEdgeToggle">add edge(s)</label><input type="checkbox" id="addEdgeToggle"/></li>');
+				$('#addEdgeToggle').button();
+
+				$('#addEdgeToggle').bind('change', function(){
+		      if($(this).is(':checked')){
+		          $(this).button('option', 'label', "stop adding edge(s)");
+		          network.addEdgeMode();
+		        }else{
+		          $(this).button('option', 'label', "add edge(s)");
+		          network.disableEditMode();
+							network.enableEditMode();
+		        }
+		      });
 
 				// add a button which enables the user to edit a edges parameters (bandwidth, delay), IF a edge is selected
 				$('#legendList').append('<li id="edgeInfoItem" class="list-group-item"><button id="editEdgeInfoBtn">edit edge info</button></li>');
