@@ -125,7 +125,33 @@ var options = {
       // draw Legend / Toolbox
       drawLegend();
 
+			// start observing the graph-container
+			setupGraphManipulationListener();
+
 });
+
+// Adds a change-listener to the visjs-manipulation toolbar
+// in order to be able to correct faulty behavior
+// concerning addEdge(s)
+function setupGraphManipulationListener(){
+	MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
+
+	var observer = new MutationObserver(function(mutations, observer) {
+		// fired when a mutation occurs
+		if(($('#addEdgeToggle').is(':checked')) && ($(".vis-back").length === 0)){
+			// user pressed the back-button in the toolbar -> reset addEdgeToggle state
+			$('#addEdgeToggle').removeAttr('checked');
+			$('#addEdgeToggle').button("refresh");
+		}
+	});
+
+	// define what element should be observed by the observer
+	// and what types of mutations trigger the callback
+	observer.observe(document.querySelector('.vis-manipulation'), {
+		subtree: true,
+		childList: true
+	});
+}
 
 // Initializes the network (once) at program-startup
 function initNetwork(){
