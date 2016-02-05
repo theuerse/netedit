@@ -142,6 +142,7 @@ function setupGraphManipulationListener(){
 			// user pressed the back-button in the toolbar -> reset addEdgeToggle state
 			$('#addEdgeToggle').removeAttr('checked');
 			$('#addEdgeToggle').button("refresh");
+			$('#addEdgeToggle').button('option', 'label', "add edge(s)");
 		}
 	});
 
