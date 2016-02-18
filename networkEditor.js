@@ -140,9 +140,7 @@ function setupGraphManipulationListener(){
 		// fired when a mutation occurs
 		if(($('#addEdgeToggle').is(':checked')) && ($(".vis-back").length === 0)){
 			// user pressed the back-button in the toolbar -> reset addEdgeToggle state
-			$('#addEdgeToggle').removeAttr('checked');
-			$('#addEdgeToggle').button("refresh");
-			$('#addEdgeToggle').button('option', 'label', "add edge(s)");
+		  resetAddEdgeToggleButton();
 		}
 	});
 
@@ -218,6 +216,13 @@ function drawLegend(){
 					if(event.keyCode === 46){ // DELETE ... 46
 						// user pressed 'delete' -> delete the currently selected node/edge
 						network.deleteSelected();
+					}else if(event.keyCode === 27){ // ESCAPE ... 27
+						// cancel adding edges if in addEdges-Mode and the escape-key is pressed
+						if($('#addEdgeToggle').is(':checked')){
+							resetAddEdgeToggleButton();
+							network.disableEditMode();
+							network.enableEditMode();
+						}
 					}
 				});
 
@@ -290,6 +295,14 @@ function drawLegend(){
 
 				// add eventhandlers to react to teh selection of nodes/edges
 				addNetworkEventListeners();
+}
+
+// Resets the visual appearance of the addEdge-toggleButton
+// e.g. in case it should be reset programmatically without clicking it
+function resetAddEdgeToggleButton(){
+	$('#addEdgeToggle').removeAttr('checked');
+	$('#addEdgeToggle').button("refresh");
+	$('#addEdgeToggle').button('option', 'label', "add edge(s)");
 }
 
 // adds some eventhandlers important to the manipulation/editing of the networks nodes/edges
