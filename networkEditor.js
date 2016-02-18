@@ -112,6 +112,9 @@ var options = {
 	    // hide javaScriptAlert - div, proof that js works
 	    $(javaScriptAlert).hide();
 
+			// hide message container
+			$(messageContainer).hide();
+
       lengendWidth = $('#legendContainer').width();
 
       $("body").mousemove(function(e) {
@@ -227,7 +230,7 @@ function drawLegend(){
 				});
 
 				// add a FileOpen-Button
-				$('#legendList').append('<li class="list-group-item"><input  id="fileInput" type="file"/><button id="openFileBtn">choose file</button></li>');
+				$('#legendList').append('<li class="list-group-item"><input  id="fileInput" type="file"/><button id="openFileBtn">import topology</button></li>');
 				$('#fileInput').change(function(event){
 					var files = event.target.files;
 					if(files.length > 0){
