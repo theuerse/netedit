@@ -37,8 +37,10 @@ var options = {
 	autoResize: true,
 	height: '100%',
 	edges: {
-		color: '#0c58bc',
+		color: {color: '#0c58bc', hover: '#0c58bc', highlight: '#ff0000'},
+		shadow: true,
 		physics: true,
+		selectionWidth: 0,
 		hoverWidth: 0
 	},
 	interaction: {
@@ -58,7 +60,9 @@ var options = {
 		},
 	},
 	nodes: {
+		shadow: true,
 		physics: true,
+		shape: "image",
 		shapeProperties: {useBorderWithImage: true},
 		borderWidth: 0,
 		borderWidthSelected: 3
@@ -96,6 +100,7 @@ var options = {
 				callback(null);
 			}else{
 				callback(data);
+				$("#edgeInfoItem").hide();
 			}
 		},
 		deleteEdge: function(data, callback){
@@ -234,11 +239,14 @@ function drawLegend(){
               var pos = network.DOMtoCanvas({x: mousePosition.x - lengendWidth, y: mousePosition.y});
 							var nodeId = getNextFreeId();
               if(ui.draggable[0].id === "imgRouter"){
-                nodes.add({id: nodeId, x:pos.x, y: pos.y, label: 'Pi #' + nodeId, color: nodeColors, group: "router", shape: "image", font: "20px arial #000000", image: images.router, shadow: true, physics:false});
+                nodes.add({id: nodeId, x:pos.x, y: pos.y, label: 'Pi #' + nodeId, color: nodeColors,
+									group: "router", font: "20px arial #000000", image: images.router, physics:false});
               }else if(ui.draggable[0].id === "imgServer"){
-                nodes.add({id: nodeId, x:pos.x, y: pos.y, label: 'Pi #' + nodeId, color: nodeColors, group: "server", shape: "image", font: "20px arial #000000", image: images.server, shadow: true, physics:false});
+                nodes.add({id: nodeId, x:pos.x, y: pos.y, label: 'Pi #' + nodeId, color: nodeColors,
+								 	group: "server", font: "20px arial #000000", image: images.server, physics:false});
               }else if(ui.draggable[0].id === "imgClient"){
-                nodes.add({id: nodeId, x:pos.x, y: pos.y, label: 'Pi #' + nodeId, color: nodeColors, group: "client", shape: "image", font: "20px arial #000000", image: images.client, shadow: true, physics:false});
+                nodes.add({id: nodeId, x:pos.x, y: pos.y, label: 'Pi #' + nodeId, color: nodeColors,
+									group: "client", font: "20px arial #000000", image: images.client, physics:false});
               }
               network.redraw();
             }
@@ -353,18 +361,10 @@ function addNetworkEventListeners(){
 	// Only show option to edit edge-connection info when the user has currently selected an edge
 	network.on("selectEdge", function(params){
 		$("#edgeInfoItem").show();
-		changeEdgeColor(params.edges[0],'#ff0000');
 	});
 	network.on("deselectEdge", function(params){
 		$("#edgeInfoItem").hide();
-		changeEdgeColor(params.previousSelection.edges[0], '#0c58bc');
 	});
-
-	function changeEdgeColor(edgeId,color){
-		var edge = network.body.data.edges.get(edgeId);
-		edge.color = color;
-		edges.update([edge]);
-	}
 
 	// Only show grou select when the user has currently selected an node
 	network.on("selectNode", function(params){
@@ -387,6 +387,7 @@ function addNetworkEventListeners(){
 
 	network.on("dragEnd", function(params){
 		network.unselectAll();
+		$("#nodeGroupItem").hide();
 	});
 
 	// doubleClick on edge -> open edgeEdit-Dialog
@@ -448,8 +449,8 @@ function drawTopology(data){
 			// lines[index] contains number of nodes (assumed correct everytime)
 			numberOfNodes = lines[index];
 			for(i = 0; i < numberOfNodes; i++){
-			  nodeData.add({id: i, group: "router", shadow: true,  color: nodeColors,
-				  label: 'Pi #' + i, shape: "image", image: images.router,font: "20px arial black"});
+			  nodeData.add({id: i, group: "router", label: 'Pi #' + i, font: "20px arial #000000",
+					color: nodeColors, image: images.router});
 			}
 		}else if(part == 1){
 			// add edges
@@ -459,7 +460,7 @@ function drawTopology(data){
 			// add edge first two entries ... connected nodes ( a -> b)
 			var edgeId = edgeInfo[0] + '-'+ edgeInfo[1];
 			edgeData.add({id: edgeId, from: parseInt(edgeInfo[0]),
-				to: parseInt(edgeInfo[1]), width: width, shadow: true, font: {align: 'bottom'}});
+				to: parseInt(edgeInfo[1]), width: width, font: {align: 'bottom'}});
 
       edgeInformation[edgeId]={bandwidthRight: parseInt(edgeInfo[2]),bandwidthLeft: parseInt(edgeInfo[3]),
 				 delayRight: parseInt(edgeInfo[4]), delayLeft: parseInt(edgeInfo[5])};
@@ -475,13 +476,12 @@ function drawTopology(data){
 			if($.inArray(nodeInfo[1],servers)<0){
 				servers.push(nodeInfo[1]); // add server-id only if not already present
 			}
-			nodeData.update({id: parseInt(nodeInfo[1]), label: 'Pi #' + nodeInfo[1], group: "server",
-				 shadow: true, shape: "image", image: images.server, font: "20px arial " + colors[$.inArray(nodeInfo[1],servers)]});
+			nodeData.update({id: parseInt(nodeInfo[1]), label: 'Pi #' + nodeInfo[1], color: nodeColors, group: "server",
+				image: images.server, font: "20px arial " + colors[$.inArray(nodeInfo[1],servers)]});
 
 			// nodeInfo[0] ... id of client - node
-			nodeData.update({id: parseInt(nodeInfo[0]), label: 'Pi #' + nodeInfo[0], group: "client",
-				 shadow: true, shape: "image", image: images.client,
-				 font: "20px arial " + colors[$.inArray(nodeInfo[1],servers)]});
+			nodeData.update({id: parseInt(nodeInfo[0]), label: 'Pi #' + nodeInfo[0], color: nodeColors, group: "client",
+				image: images.client,font: "20px arial " + colors[$.inArray(nodeInfo[1],servers)]});
 		}
 	}
 
