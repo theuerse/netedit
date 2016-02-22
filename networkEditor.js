@@ -80,6 +80,11 @@ var options = {
 		editEdge: function(data, callback){
 			 // check if there is already a edge from here to there
 			if(isEdgeAlreadyPresent(data.from, data.to) || (data.to === data.from)){
+				if((data.to === data.from)){
+					showMessage("Edges with same start- and end-node not allowed.","danger");
+				}else{
+					showMessage("Only one edge per node-pair allowed.","danger");
+				}
 				callback(null);
 			}else{
 				callback(data);
@@ -426,8 +431,8 @@ function drawTopology(data){
       var width =  3;
 			// add edge first two entries ... connected nodes ( a -> b)
 			var edgeId = edgeInfo[0] + '-'+ edgeInfo[1];
-			edgeData.add({id: edgeId, from: edgeInfo[0],
-				to: edgeInfo[1], width: width, shadow: true, font: {align: 'bottom'}});
+			edgeData.add({id: edgeId, from: parseInt(edgeInfo[0]),
+				to: parseInt(edgeInfo[1]), width: width, shadow: true, font: {align: 'bottom'}});
 
       edgeInformation[edgeId]={bandwidthRight: parseInt(edgeInfo[2]),bandwidthLeft: parseInt(edgeInfo[3]),
 				 delayRight: parseInt(edgeInfo[4]), delayLeft: parseInt(edgeInfo[5])};
