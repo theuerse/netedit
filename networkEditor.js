@@ -133,6 +133,12 @@ var options = {
         mousePosition.y = e.pageY;
       });
 
+			// disable text-selection (especially helpful on buttons / draggable images)
+			$(document).bind('selectstart', function(e) {
+				e.preventDefault();
+				return false;
+			});
+
       // init Network-graph
       initNetwork();
 
