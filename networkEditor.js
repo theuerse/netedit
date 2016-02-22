@@ -27,12 +27,17 @@ var arrowLeft = '<span class="glyphicon glyphicon-arrow-left" aria-hidden="true"
 var colors = ["#0247fe","#8601af","#66b032","#fe2712","#fefe33","#fb9902",
 		      "#0392ce","#3d01a4","#d0ea2b","#a7194b","#fabc02"];
 
+var nodeColors = {border: 'rgba(255,255,255,0.0)', background: 'rgba(255,255,255,0.0)',
+ highlight: {border: 'rgba(255,0,0,1.0)', background: 'rgba(255,255,255,0.0)'},
+ hover: {border: 'rgba(255,255,255,0.0)', background: 'rgba(255,255,255,0.0)'}};
+
 var options = {
 	// specify randomseed => network is the same at every startup
 	layout:{randomSeed: 2},
 	autoResize: true,
 	height: '100%',
 	edges: {
+		color: '#0c58bc',
 		physics: true,
 		hoverWidth: 0
 	},
@@ -53,7 +58,10 @@ var options = {
 		},
 	},
 	nodes: {
-		physics: true
+		physics: true,
+		shapeProperties: {useBorderWithImage: true},
+		borderWidth: 0,
+		borderWidthSelected: 3
 	},
 	manipulation: {
 		initiallyActive: true,
@@ -225,12 +233,12 @@ function drawLegend(){
             drop: function( event, ui ) {
               var pos = network.DOMtoCanvas({x: mousePosition.x - lengendWidth, y: mousePosition.y});
 							var nodeId = getNextFreeId();
-              if(ui.draggable[0].id === "imgRouter"){ //TODO: id - assignment doesn't cover deletion of nodes (gap!)
-                nodes.add({id: nodeId, x:pos.x, y: pos.y, label: 'Pi #' + nodeId, color: '#3c87eb', group: "router", shape: "image", font: "20px arial #000000", image: images.router, shadow: true, physics:false});
+              if(ui.draggable[0].id === "imgRouter"){
+                nodes.add({id: nodeId, x:pos.x, y: pos.y, label: 'Pi #' + nodeId, color: nodeColors, group: "router", shape: "image", font: "20px arial #000000", image: images.router, shadow: true, physics:false});
               }else if(ui.draggable[0].id === "imgServer"){
-                nodes.add({id: nodeId, x:pos.x, y: pos.y, label: 'Pi #' + nodeId, color: '#3c87eb', group: "server", shape: "image", font: "20px arial #000000", image: images.server, shadow: true, physics:false});
+                nodes.add({id: nodeId, x:pos.x, y: pos.y, label: 'Pi #' + nodeId, color: nodeColors, group: "server", shape: "image", font: "20px arial #000000", image: images.server, shadow: true, physics:false});
               }else if(ui.draggable[0].id === "imgClient"){
-                nodes.add({id: nodeId, x:pos.x, y: pos.y, label: 'Pi #' + nodeId, color: '#3c87eb', group: "client", shape: "image", font: "20px arial #000000", image: images.client, shadow: true, physics:false});
+                nodes.add({id: nodeId, x:pos.x, y: pos.y, label: 'Pi #' + nodeId, color: nodeColors, group: "client", shape: "image", font: "20px arial #000000", image: images.client, shadow: true, physics:false});
               }
               network.redraw();
             }
@@ -345,10 +353,18 @@ function addNetworkEventListeners(){
 	// Only show option to edit edge-connection info when the user has currently selected an edge
 	network.on("selectEdge", function(params){
 		$("#edgeInfoItem").show();
+		changeEdgeColor(params.edges[0],'#ff0000');
 	});
 	network.on("deselectEdge", function(params){
 		$("#edgeInfoItem").hide();
+		changeEdgeColor(params.previousSelection.edges[0], '#0c58bc');
 	});
+
+	function changeEdgeColor(edgeId,color){
+		var edge = network.body.data.edges.get(edgeId);
+		edge.color = color;
+		edges.update([edge]);
+	}
 
 	// Only show grou select when the user has currently selected an node
 	network.on("selectNode", function(params){
@@ -364,8 +380,13 @@ function addNetworkEventListeners(){
 		}
 		$("#nodeGroupItem").show();
 	});
+
 	network.on("deselectNode", function(params){
 		$("#nodeGroupItem").hide();
+	});
+
+	network.on("dragEnd", function(params){
+		network.unselectAll();
 	});
 
 	// doubleClick on edge -> open edgeEdit-Dialog
@@ -427,7 +448,7 @@ function drawTopology(data){
 			// lines[index] contains number of nodes (assumed correct everytime)
 			numberOfNodes = lines[index];
 			for(i = 0; i < numberOfNodes; i++){
-			  nodeData.add({id: i, group: "router", shadow: true,  color: '#3c87eb',
+			  nodeData.add({id: i, group: "router", shadow: true,  color: nodeColors,
 				  label: 'Pi #' + i, shape: "image", image: images.router,font: "20px arial black"});
 			}
 		}else if(part == 1){
