@@ -17,6 +17,7 @@ var edges;
 var network;
 var edgeInformation = {};
 var edgeCoolTipTimeout = {};
+var messageHideTimeout = {};
 var topologyFile;
 
 var arrowRight = '<span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>';
@@ -73,8 +74,8 @@ var options = {
 						network.addEdgeMode();
 					 }
 
-				 }
-			 }
+				 } else {showMessage("Only one edge per node-pair allowed.","danger");}
+			 }else {showMessage("Edges with same start- and end-node not allowed.","danger");}
 		},
 		editEdge: function(data, callback){
 			 // check if there is already a edge from here to there
@@ -110,10 +111,15 @@ var options = {
 //
  $(document).ready(function(){
 	    // hide javaScriptAlert - div, proof that js works
-	    $(javaScriptAlert).hide();
+	    $('#javaScriptAlert').hide();
 
 			// hide message container
-			$(messageContainer).hide();
+			$('#messageContainer').hide();
+
+			// add eventhandler to allow dismissal of message
+			$('#messageContainer button').click(function(){
+				$('#messageContainer').hide();
+			});
 
       lengendWidth = $('#legendContainer').width();
 
@@ -198,7 +204,12 @@ function drawLegend(){
         // handle incoming drops from the legend / toolbox
         $( "#graphContainer" ).droppable({
 						accept: function(el) {
-							return (nodes.length < maxNumberOfNodes); // only allow to add up to maxNumberOfNodes nodes
+							// only allow to add up to maxNumberOfNodes nodes
+							if(nodes.length < maxNumberOfNodes){ return true;}
+							else {
+								showMessage("Node-limit (max " + maxNumberOfNodes + " nodes) reached.","danger");
+								return false;
+							}
 						},
             drop: function( event, ui ) {
               var pos = network.DOMtoCanvas({x: mousePosition.x - lengendWidth, y: mousePosition.y});
@@ -222,9 +233,7 @@ function drawLegend(){
 					}else if(event.keyCode === 27){ // ESCAPE ... 27
 						// cancel adding edges if in addEdges-Mode and the escape-key is pressed
 						if($('#addEdgeToggle').is(':checked')){
-							resetAddEdgeToggleButton();
-							network.disableEditMode();
-							network.enableEditMode();
+							stopAddingEdges();
 						}
 					}
 				});
@@ -243,24 +252,27 @@ function drawLegend(){
 					}
 				});
 				$("#openFileBtn").button().click(function(event){
+					stopAddingEdges();
 					$("#fileInput").trigger("click");
 				});
 
         // add a button opening a dialog for editing edge-presets
         $('#legendList').append('<li class="list-group-item"><button id="presetBtn">edit edge presets</button></li>');
         $('#presetBtn').button().click(function(event){
+					stopAddingEdges();
 					// show modal dialog in which the edge-presets can be edited
 					showEdgePresetEditDialog();
 				});
 
 				// add a button responsible to create/ let download the topology-file of the current network
 				// or show a error-dialog if the network is not connected (there exist isolated nodes)
-				$('#legendList').append('<li class="list-group-item"><button id="genBtn">generate file</button></li>');
-				$('#genBtn').button().click(function(event){
+				$('#legendList').append('<li class="list-group-item"><button id="exportBtn">export topology</button></li>');
+				$('#exportBtn').button().click(function(event){
+					stopAddingEdges();
 					if(isNetworkConnected()){
 						makeFileAvailable(getTopologyFile());
 					}else {
-						showTopologyErrorDialog();
+						showMessage("The network-topology file could not be created: The network is not connected.","danger");
 					}
 				});
 
@@ -282,6 +294,7 @@ function drawLegend(){
 				// add a button which enables the user to edit a edges parameters (bandwidth, delay), IF a edge is selected
 				$('#legendList').append('<li id="edgeInfoItem" class="list-group-item"><button id="editEdgeInfoBtn">edit edge info</button></li>');
 				$('#editEdgeInfoBtn').button().click(function(event){
+					stopAddingEdges();
 					// show modal dialog in which the edge-params can be specified
 					showEdgeParameterEditDialog();
 				});
@@ -290,6 +303,7 @@ function drawLegend(){
 				// add group (color) - selector
 				$('#legendList').append('<li id="nodeGroupItem" class="list-group-item"><label for="number">group:</label><select id="grpSelect" class="form-control"></select></li>');
 				$( "#grpSelect" ).change(function() {
+					stopAddingEdges();
 					if(network.getSelectedNodes().length === 1){
 						nodes.update([{id: network.getSelectedNodes()[0], font: "20px arial " + $( this ).val()}]);
 					}
@@ -298,6 +312,13 @@ function drawLegend(){
 
 				// add eventhandlers to react to teh selection of nodes/edges
 				addNetworkEventListeners();
+}
+
+// Ends the repeated adding of edges and resets the corresponding button
+function stopAddingEdges(){
+	resetAddEdgeToggleButton();
+	network.disableEditMode();
+	network.enableEditMode();
 }
 
 // Resets the visual appearance of the addEdge-toggleButton
@@ -338,6 +359,7 @@ function addNetworkEventListeners(){
 
 	// doubleClick on edge -> open edgeEdit-Dialog
 	network.on("doubleClick", function(params){
+		stopAddingEdges();
 		if(params.edges.length === 1){
 			cleanupEdgeCooltips();
 			showEdgeParameterEditDialog();
@@ -522,15 +544,6 @@ function showTopologyDownloadDialog(fileUrl){
 
 	$("#downloadLink").attr("href", fileUrl); // update anchor-target
 	$("#downloadLink").button();
-}
-
-// display a dialog explaining the reason the topologyFile could not be created
-function showTopologyErrorDialog(){
-	$("#topologyErrorDialog").dialog({
-		modal: true,
-		width: 450,
-		buttons: {Ok: function(){$(this).dialog("close");}}
-	});
 }
 
 // changes the respective width of edges according to the relation
@@ -746,6 +759,23 @@ function cleanupEdgeCooltips(){
   for(var edgeId in allEdges) {
     hideEdgeCooltip(edgeId);
   }
+}
+
+// Displays "text" in a box styled in "kind"
+// kind may be info, success, warning, danger,
+function showMessage(text,kind){
+	// change message-text to the new requirements
+	$('#messageContainer').attr("class","alert alert-dismissible alert-" + kind);
+	$('#message').html(text);
+
+	// show messageContainer, if it isn't visible already
+	if(!$('#messageContainer').is(":visible")){
+		$('#messageContainer').show();
+	}
+
+	// reset timer to hide messageContainer automatically after 3 seconds
+	clearTimeout(messageHideTimeout);
+	messageHideTimeout = setTimeout(function(){$('#messageContainer').hide();},3000);
 }
 
 
