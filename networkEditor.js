@@ -229,7 +229,7 @@ function drawLegend(){
         $( "#graphContainer" ).droppable({
 						accept: function(el) {
 							// only allow to add up to maxNumberOfNodes nodes
-							if(nodes.length < maxNumberOfNodes){ return true;}
+							if((el[0].tagName !== "IMG") || (nodes.length < maxNumberOfNodes)){ return true;}
 							else {
 								showMessage("Node-limit (max " + maxNumberOfNodes + " nodes) reached.","danger");
 								return false;
