@@ -597,27 +597,26 @@ var options = {
           $("#lossTypeLegend").html("Loss-Type " + arrowLeft);
         }
 
-        $("#lossSelect").on('change', function(){
-          updateLossParameterView($(this).val());
-        });
-        loadLossParams(lossString);
+        $('#lossSelect').val(categorize(lossString));
 
-        $('#lossSelect').val((lossString === undefined) ? "" + lossString : lossString.split(" ")[0]);
+        $("#lossSelect").on('change', function(){
+          var tmpLossString = printLossString(); // try to carry over as much as possible
+          updateLossParameterView($(this).val());
+          fillInLossStringParams(tmpLossString);
+        });
+
+
+        // establish structure
+        updateLossParameterView(categorize(lossString));
+        // fill in the blanks
+        fillInLossStringParams(lossString);
       }
 
-      // initally fill in loss-Parameters
-      function loadLossParams(lossString){
-        var parts= [];
+      // tries to insert given parameters into existing controls (spinners)
+      function fillInLossStringParams(lossString){
+        if(lossString === undefined) return;
 
-        // Establish structure
-        if(lossString === undefined){
-          updateLossParameterView(lossString);
-        }else{
-          parts = lossString.split(" ");
-          updateLossParameterView(parts[0]);
-        }
-
-        // insert values
+        var parts = lossString.split(" ");
         var fields = $("#lossParameterSet").find(".spinner");
 
         var index;
@@ -628,7 +627,6 @@ var options = {
 
       // Arrange the needed input-facility for a given loss-type
       function updateLossParameterView(newType){
-        newType = categorize(newType);
 
         // refresh parameter-view
         $("#lossParameterSet").empty();
