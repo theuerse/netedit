@@ -38,6 +38,7 @@ var nodeColors = {border: 'rgba(255,255,255,0.0)', background: 'rgba(255,255,255
 highlight: {border: 'rgba(255,0,0,1.0)', background: 'rgba(255,255,255,0.0)'},
 hover: {border: 'rgba(255,255,255,0.0)', background: 'rgba(255,255,255,0.0)'}};
 
+var zeroLoss = "random 0";
 var temp = {lossRight: undefined, lossLeft: undefined};
 var printLossString; // variable containing the function for printing the selected loss value
 
@@ -341,7 +342,11 @@ var options = {
         fileBuffer.push("#number of nodes");
         fileBuffer.push(nodes.length); // e.g. 20
 
-        fileBuffer.push("#nodes setting (n1,n2,bandwidth in kbits a -> b, bandwidth in kbits a <- b, delay a -> b in ms, delay b -> a in ms");
+        var header = "#nodes setting (n1,n2,bandwidth in kbits a -> b, bandwidth in kbits a <- b, delay a -> b in ms, delay b -> a in ms";
+        if(isLossMentioned()){
+          header += ", loss a -> b, loss a <- b";
+        }
+        fileBuffer.push(header);
         edges.forEach(function(edge){
           info = edgeInformation[edge.id];
 
@@ -350,10 +355,16 @@ var options = {
 
           if(info.lossRight !== undefined && info.lossRight !== "undefined"){
             entry += "," + info.lossRight;
+          } else if(info.lossLeft !== undefined && info.lossLeft !== "undefined"){
+            // if lossLeft is present, lossRight must be presend, at least as a placeholder
+            entry += "," + zeroLoss; // '... netem random 0' equates to no loss at all when executed
           }
 
           if(info.lossLeft !== undefined && info.lossLeft !== "undefined"){
             entry += "," + info.lossLeft;
+          }else if(info.lossRight !== undefined && info.lossRight !== "undefined"){
+              // if lossRight is present, lossLeft must be presend, at least as a placeholder
+            entry += "," + zeroLoss;
           }
 
           fileBuffer.push(entry);
@@ -396,6 +407,22 @@ var options = {
 
         fileBuffer.push("#eof //do not delete this");
         return fileBuffer.join("\n");
+      }
+
+      // returns true if there is loss defined in one edge
+      function isLossMentioned(){
+        var mentioned = false;
+
+        edges.forEach(function(edge){
+          info = edgeInformation[edge.id];
+          if(info.lossRight !== undefined && info.lossRight !== "undefined") {
+            mentioned=true;
+          }
+          if(info.lossLeft !== undefined && info.lossLeft !== "undefined") {
+            mentioned = true;
+          }
+        });
+        return mentioned;
       }
 
       // changes the respective width of edges according to the relation
