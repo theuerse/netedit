@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="utf-8"/>
     <link rel="icon" type="image/png" href="favicon-32x32.png" sizes="32x32" />
     <link rel="icon" type="image/png" href="favicon-16x16.png" sizes="16x16" />
     <link href="res/vis/vis.min.css" rel="stylesheet" />
-    <link href="res/bootstrap/css/bootstrap.min.css", rel="stylesheet" />
-    <link href="networkEditor.css", rel="stylesheet" />
-    <link href="res/jquery-ui/jquery-ui.min.css", rel="stylesheet" />
+    <link href="res/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="res/font-awesome/css/font-awesome.min.css"/>
+    <link href="networkEditor.css" rel="stylesheet" />
+    <link href="res/jquery-ui/jquery-ui.min.css" rel="stylesheet" />
 
     <script type="text/javascript" src="res/jquery-2.1.4.min.js"></script>
     <script type="text/javascript" src="res/jquery-ui/jquery-ui.min.js"></script>
@@ -18,7 +20,7 @@
 
 </head>
 <body>
-    <div id="javaScriptAlert"class="alert alert-danger" role="alert">
+    <div id="javaScriptAlert" class="alert alert-danger" role="alert">
 		This Page needs JavaScript in order to work, please enable it.
 	</div>
 
@@ -32,31 +34,62 @@
 
 	<div id="edgeDialog" title="Edit edge parameters">
 		<!-- Sub-title identifying the edge -->
-		<span id="edgeTitle"></span>
+		<p id="edgeTitle"></p>
 
-		<table id="edgeParamTable">
-			<tr> 	<!-- Bandwidth right -->
-				<td><label for="bandwidthRight">Bandwidth <span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></label></td>
-				<td><input class="spinner" id="bandwidthRight"></td>
-				<td>[kbps]<td>
-			</tr>
-			<tr> 	<!-- Bandwidth left -->
-				<td><label for="bandwidthLeft">Bandwidth <span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></label></td>
-				<td><input class="spinner" id="bandwidthLeft"></td>
-				<td>[kbps]<td>
-			</tr>
-			<tr> 	<!-- Delay right -->
-				<td><label for="delayRight">Delay <span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></label></td>
-				<td><input class="spinner" id="delayRight"></td>
-				<td>[ms]<td>
-			</tr>
-			<tr> 	<!-- Delay left -->
-				<td><label for="delayLeft">Delay <span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></label></td>
-				<td><input class="spinner" id="delayLeft"></td>
-				<td>[ms]<td>
-			</tr>
-		</table>
+		<div id="edgeParams">
+      <fieldset>
+        <legend>Bandwidth</legend>
+        <!-- Bandwidth right -->
+        <span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
+        <input class="spinner" id="bandwidthRight"/> [kbps]
+        <br>
+        <!-- Bandwidth left -->
+        <span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
+        <input class="spinner" id="bandwidthLeft"/> [kbps]
+      </fieldset>
+      <fieldset>
+        <legend>Delay</legend>
+        <!-- Delay right -->
+        <span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
+        <input class="spinner" id="delayRight"/> [ms]
+        <br>
+        <!-- Delay left -->
+        <span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
+        <input class="spinner" id="delayLeft"/> [ms]
+      </fieldset>
+      <fieldset>
+        <legend>Loss</legend>
+        <!-- Loss right -->
+        <span id="lossRight" class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
+        <button id="lossRightBtn" class="tagsBtn"><i class="fa fa-cog" aria-hidden="true"></i></button>
+        <br>
+        <!-- Loss left -->
+        <span id="lossLeft" class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
+        <button id="lossLeftBtn" class="tagsBtn"><i class="fa fa-cog" aria-hidden="true"></i></button>
+      </fieldset>
+		</div>
 	</div>
+
+  <div id="lossDialog" title="Edit loss parameters">
+    <fieldset>
+      <legend id="lossTypeLegend">Loss-Type</legend>
+      <select id="lossSelect" name="lossSelect">
+        <option value="undefined" selected="selected">undefined</option>
+        <option value="random">Random</option>
+        <option value="state">Markov-State</option>
+        <option value="bernoulli">Bernoulli</option>
+        <option value="simpleGilbert">SimpleGilbert</option>
+        <option value="gilbert">Gilbert</option>
+        <option value="gilbertElliot">GilbertElliot</option>
+      </select>
+      <p id="lossInfoText"></p>
+    </fieldset>
+    <br>
+    <fieldset id="lossParameterSet">
+      <legend>Parameters</legend>
+    </fieldset>
+    <img id="lossImg"/>
+  </div>
 
 	<div id="topologyErrorDialog" title="The network-topology file could not be created">
 		<p>The network is not connected.</p>
@@ -72,7 +105,7 @@
 		<div class ="controlGroup">
 			<p>
 				<label for="bandwidthRange">Bandwidth will range from:</label>
-				<input type="text" id="bandwidthRange" readonly style="border:0; color:#f6931f; font-weight:bold;">
+				<input type="text" id="bandwidthRange" readonly style="border:0; color:#f6931f; font-weight:bold;"/>
 			</p>
 			<div id="bandwidthRangeSlider"></div>
 		</div>
@@ -80,7 +113,7 @@
 		<div class="controlGroup">
 			<p>
 				<label for="delayRange">Delay will range from:</label>
-				<input type="text" id="delayRange" readonly style="border:0; color:#f6931f; font-weight:bold;">
+				<input type="text" id="delayRange" readonly style="border:0; color:#f6931f; font-weight:bold;"/>
 			</p>
 			<div id="delayRangeSlider"></div>
 		</div>

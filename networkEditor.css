@@ -27,9 +27,8 @@ html, body {
 	margin-top: 5px;
 }
 
-#edgeParamTable {
-	border-spacing: 5px;
-  border-collapse: separate;
+select {
+  width: 10em;
 }
 
 .controlGroup {
@@ -40,4 +39,26 @@ html, body {
   visibility: hidden;
   width: 0;
   height: 0;
+}
+
+#lossImg {
+  width: 400px;
+  vertical-align: top;
+}
+
+.glyphicon:before { margin-right: 10px; }
+
+#lossParameterSet label {
+  width: 2em;
+}
+
+#edgeTitle {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+fieldset, #lossImgContainer {
+  display: inline;
+  margin-right: 20px;
+  margin-bottom: 20px;
 }
