@@ -38,6 +38,7 @@ var nodeColors = {border: 'rgba(255,255,255,0.0)', background: 'rgba(255,255,255
 highlight: {border: 'rgba(255,0,0,1.0)', background: 'rgba(255,255,255,0.0)'},
 hover: {border: 'rgba(255,255,255,0.0)', background: 'rgba(255,255,255,0.0)'}};
 
+var temp = {lossRight: undefined, lossLeft: undefined};
 var printLossString; // variable containing the function for printing the selected loss value
 
 var options = {
@@ -528,8 +529,11 @@ var options = {
 
             $(".spinner").css("width",50); // constrain width of input-elements
 
-            $("#lossRight").html(""+edgeInfo.lossRight);
-            $("#lossLeft").html(""+edgeInfo.lossLeft);
+            // temporary cache for left/right loss value (allow for 'Cancel')
+            temp.lossRight = "" + edgeInfo.lossRight;
+            temp.lossLeft = "" + edgeInfo.lossLeft;
+            $("#lossRight").html(temp.lossRight);
+            $("#lossLeft").html(temp.lossLeft);
 
             $("#lossRightBtn").button().on( "click", function() {
               showLossParameterDialog("lossRight");
@@ -548,6 +552,9 @@ var options = {
               edgeInformation[selectedEdgeId].bandwidthLeft = $("#bandwidthLeft").spinner("value");
               edgeInformation[selectedEdgeId].delayRight = $("#delayRight").spinner("value");
               edgeInformation[selectedEdgeId].delayLeft = $("#delayLeft").spinner("value");
+              edgeInformation[selectedEdgeId].lossRight = temp.lossRight;
+              edgeInformation[selectedEdgeId].lossLeft = temp.lossLeft;
+
               $( this ).dialog( "close" );
               updateEdgeWidth(); // display possible changes in bandwidth
             },
@@ -566,8 +573,7 @@ var options = {
       // Displays a dialog allowing for the change of the loss parameters of a edge
       // (only one direction at a time)
       function showLossParameterDialog(property){
-        var selectedEdgeId = network.getSelectedEdges()[0];
-        var lossString = edgeInformation[selectedEdgeId][property];
+        var lossString = temp[property];
 
 
         $( "#lossDialog" ).dialog({
@@ -576,11 +582,9 @@ var options = {
           height:450,
           buttons: {
             "Ok": function() {
-              // update existing loss-settings for this edge
-              var selectedEdgeId = network.getSelectedEdges()[0];
-
-              edgeInformation[selectedEdgeId][property] = printLossString();
-              $("#" + property).html(edgeInformation[selectedEdgeId][property]);
+              // update temporary loss-settings for this edge
+              temp[property] = printLossString();
+              $("#" + property).html(temp[property]);
               $(this).dialog( "close" );
             },
             Cancel: function() {
