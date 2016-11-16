@@ -757,7 +757,7 @@ var options = {
 
         var title = 'Pi #' + edges.get(id).from + '&emsp; &#x21c4 &emsp;' + 'Pi #' + edges.get(id).to;
         if($("#" + id).length === 0){ // add div if not already present
-          $("body").append('<div id="' + id + '" title="'+ title + '"></div>');
+          $("body").append('<div id="' + id + '" class="cooltip" title="'+ title + '"></div>');
 
           $('#' + id).dialog({
             create: function(event, ui) {

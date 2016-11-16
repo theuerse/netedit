@@ -121,6 +121,7 @@ function drawLegend(){
       if(files.length > 0){
         var reader = new FileReader();
         reader.onload = function(theFile){
+          $(".cooltip").dialog("destroy").remove(); // remove 'old' cooltips
           drawTopology(reader.result);
           updateEdgeWidth();
         };
