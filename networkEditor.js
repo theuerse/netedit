@@ -60,9 +60,9 @@ function drawLegend(){
 
   // add Node-Images that can be dragged onto the network in order to insert them
   $('#legendList').append('<li class="list-group-item">'+
-  '<center><img class="addable" id="imgRouter" src="' + images.router +'" height="64" width="64">Router</center>'+
-  '<center><img class="addable" id="imgServer" src="' + images.server +'" height="64" width="64">Router + Server</center>'+
-  '<center><img class="addable" id="imgClient" src="' + images.client +'" height="64" width="64">Router + Client</center>'+
+  '<center><img class="addable" id="imgRouter" src="' + images.router +'" height="64" width="64"><br>Router</center>'+
+  '<center><img class="addable" id="imgServer" src="' + images.server +'" height="64" width="64"><br>Router + Server</center>'+
+  '<center><img class="addable" id="imgClient" src="' + images.client +'" height="64" width="64"><br>Router + Client</center>'+
   '</li>');
 
   $(".addable").draggable({
